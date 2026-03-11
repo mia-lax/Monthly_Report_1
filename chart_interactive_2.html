@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif; }
+  body {
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 32px;
+    padding: 40px 20px;
+  }
+
+  /* ─── 입력 폼 ─── */
+  .form-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    width: 420px;
+  }
+  .form-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 18px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .form-group label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .form-group input {
+    border: 1.5px solid #e0e0e0;
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 14px;
+    color: #222;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-group input:focus {
+    border-color: #F5C400;
+  }
+  .col-header {
+    font-size: 13px;
+    font-weight: 700;
+    color: #444;
+    padding: 4px 0 8px;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 4px;
+  }
+  .col-header.left { color: #AAAAAA; }
+  .col-header.right { color: #F5C400; }
+
+  .form-divider {
+    height: 1px;
+    background: #f0f0f0;
+    margin: 14px 0;
+  }
+
+  .btn-update {
+    width: 100%;
+    padding: 11px;
+    background: #222;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 4px;
+  }
+  .btn-update:hover { background: #444; }
+
+  /* ─── 차트 카드 ─── */
+  .chart-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px 24px 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    width: 420px;
+  }
+
+  .chart-wrap {
+    width: 100%;
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 72px;
+    font-size: 16px;
+    color: #333;
+    align-items: center;
+    justify-content: center;
+    padding-left: 20px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .legend-bar {
+    width: 18px;
+    height: 12px;
+    background: #F5C400;
+  }
+  .legend-line {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .legend-dot {
+    width: 7px;
+    height: 7px;
+    background: #222;
+    border-radius: 50%;
+  }
+  .legend-dash {
+    width: 14px;
+    height: 2px;
+    border-top: 2px dashed #222;
+  }
+
+  .chart-outer {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  .y-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 200px;
+    align-items: flex-end;
+  }
+  .y-tick { font-size: 10px; color: #888; white-space: nowrap; line-height: 1; }
+
+  .chart-container {
+    position: relative;
+    flex: 1;
+  }
+  .x-axis-line {
+    position: absolute;
+    bottom: 0;
+    left: -50px;
+    right: -50px;
+    height: 1px;
+    background: #222;
+    z-index: 0;
+  }
+  .bars-area {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 140px;
+    height: 200px;
+    position: relative;
+    z-index: 1;
+  }
+  .bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 200px;
+    position: relative;
+  }
+  .bar-left {
+    width: 60px;
+    background: #AAAAAA;
+    position: relative;
+    transition: height 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  .bar-right {
+    width: 60px;
+    background: #F5C400;
+    position: relative;
+    transition: height 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  .dot {
+    width: 9px; height: 9px;
+    background: #222;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 28px;
+  }
+  .dot-label {
+    position: absolute;
+    font-size: 18px;
+    font-weight: bold;
+    color: #222;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 10;
+  }
+  .connector { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10; }
+  .change-badge {
+    position: absolute;
+    background: #222;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 4px 8px;
+    white-space: nowrap;
+    border-radius: 4px;
+    z-index: 10;
+  }
+  .x-label {
+    width: 60px;
+    text-align: center;
+    font-size: 16px;
+    color: #333;
+    position: absolute;
+  }
+</style>
+</head>
+<body>
+
+<!-- 입력 폼 -->
+<div class="form-card">
+  <div class="form-title">📊 그래프 수치 입력</div>
+
+  <!-- 라벨 입력 먼저 -->
+  <div class="form-row">
+    <div class="form-group">
+      <label>지난 달/월</label>
+      <input type="text" id="leftLabel" value="26년 1월" placeholder="예: 26년 1월">
+    </div>
+    <div class="form-group">
+      <label>이번 달</label>
+      <input type="text" id="rightLabel" value="26년 2월" placeholder="예: 26년 2월">
+    </div>
+  </div>
+
+  <div class="form-divider"></div>
+
+  <!-- 수치 입력 -->
+  <div class="form-row">
+    <div>
+      <div class="form-group">
+        <label>운완건수</label>
+        <input type="number" id="leftCount" value="2746824" placeholder="예: 2746824">
+      </div>
+      <div class="form-group" style="margin-top:10px;">
+        <label>상담인입율 (%)</label>
+        <input type="number" step="0.01" id="leftRate" value="1.55" placeholder="예: 1.55">
+      </div>
+    </div>
+    <div>
+      <div class="form-group">
+        <label>운완건수</label>
+        <input type="number" id="rightCount" value="2441333" placeholder="예: 2441333">
+      </div>
+      <div class="form-group" style="margin-top:10px;">
+        <label>상담인입율 (%)</label>
+        <input type="number" step="0.01" id="rightRate" value="1.50" placeholder="예: 1.50">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-divider"></div>
+
+  <!-- Y축 범위 -->
+  <div style="font-size:12px; font-weight:700; color:#888; margin-bottom:8px;">운완건수 Y축 범위</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>최솟값</label>
+      <input type="number" id="yMin" value="0" placeholder="예: 0">
+    </div>
+    <div class="form-group">
+      <label>최댓값</label>
+      <input type="number" id="yMax" value="3500000" placeholder="예: 3500000">
+    </div>
+  </div>
+
+  <div style="font-size:12px; font-weight:700; color:#888; margin-bottom:8px; margin-top:12px;">상담인입율 Y축 범위 (%)</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>최솟값</label>
+      <input type="number" step="0.01" id="rateYMin" value="1.0" placeholder="예: 1.0">
+    </div>
+    <div class="form-group">
+      <label>최댓값</label>
+      <input type="number" step="0.01" id="rateYMax" value="2.0" placeholder="예: 2.0">
+    </div>
+  </div>
+
+  <button class="btn-update" onclick="updateChart()">그래프 업데이트</button>
+</div>
+
+<!-- 차트 -->
+<div class="chart-card">
+  <div class="chart-wrap">
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-bar"></div>
+        <span>운완건수</span>
+      </div>
+      <div class="legend-item legend-line">
+        <div class="legend-dot"></div>
+        <div class="legend-dash"></div>
+        <div class="legend-dot"></div>
+        <span style="margin-left:4px">상담인입율</span>
+      </div>
+    </div>
+
+    <div style="position:relative;" id="chartOuter">
+      <div class="chart-outer">
+        <div class="y-axis">
+          <span class="y-tick"></span>
+          <span class="y-tick"></span>
+        </div>
+        <div class="chart-container">
+          <div class="x-axis-line"></div>
+          <div class="bars-area" id="barsArea">
+            <div class="bar-col">
+              <div class="bar-left" id="barLeft" style="height:180px;">
+                <div class="dot" id="dotLeft"></div>
+              </div>
+            </div>
+            <div class="bar-col">
+              <div class="bar-right" id="barRight" style="height:160px;">
+                <div class="dot" id="dotRight"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <svg id="connector" class="connector" style="position:absolute;top:0;left:0;"></svg>
+      <div class="change-badge" id="badge" style="position:absolute;visibility:hidden;"></div>
+    </div>
+
+    <div style="position:relative; height:24px; margin-top:8px;" id="xLabelsWrap">
+      <div class="x-label" id="labelLeft" style="position:absolute;">26년 1월</div>
+      <div class="x-label" id="labelRight" style="position:absolute;">26년 2월</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const MAX_HEIGHT = 180;
+
+  function updateChart() {
+    const leftCount  = parseFloat(document.getElementById('leftCount').value)  || 0;
+    const rightCount = parseFloat(document.getElementById('rightCount').value) || 0;
+    const leftRate   = parseFloat(document.getElementById('leftRate').value)   || 0;
+    const rightRate  = parseFloat(document.getElementById('rightRate').value)  || 0;
+    const leftLbl    = document.getElementById('leftLabel').value  || '왼쪽';
+    const rightLbl   = document.getElementById('rightLabel').value || '오른쪽';
+
+    const yMin = parseFloat(document.getElementById('yMin').value) || 0;
+    const yMax = parseFloat(document.getElementById('yMax').value) || 3500000;
+    const yRange = yMax - yMin;
+
+    // 막대 높이 계산 (yMin~yMax 고정 범위 기준)
+    const leftH  = yRange > 0 ? Math.round(((leftCount  - yMin) / yRange) * MAX_HEIGHT) : 0;
+    const rightH = yRange > 0 ? Math.round(((rightCount - yMin) / yRange) * MAX_HEIGHT) : 0;
+
+    document.getElementById('barLeft').style.height  = leftH  + 'px';
+    document.getElementById('barRight').style.height = rightH + 'px';
+
+    // x 라벨
+    document.getElementById('labelLeft').textContent  = leftLbl;
+    document.getElementById('labelRight').textContent = rightLbl;
+
+    // 변화량
+    const diff = (rightRate - leftRate).toFixed(2);
+    const arrow = diff >= 0 ? '▲' : '▼';
+    document.getElementById('badge').textContent = arrow + Math.abs(diff) + '%p';
+
+    // 레이아웃 재계산 후 포지션 업데이트
+    setTimeout(renderPositions, 50);
+
+    function renderPositions() {
+      const barLeft  = document.getElementById('barLeft');
+      const barRight = document.getElementById('barRight');
+      const barsArea = document.getElementById('barsArea');
+      const svg      = document.getElementById('connector');
+      const badge    = document.getElementById('badge');
+      const xLabelsWrap = document.getElementById('xLabelsWrap');
+
+      const leftRect  = barLeft.getBoundingClientRect();
+      const rightRect = barRight.getBoundingClientRect();
+      const wrapRect  = barsArea.parentElement.getBoundingClientRect();
+      const xWrapRect = xLabelsWrap.getBoundingClientRect();
+
+      // 상담인입율 Y축 범위 기준으로 dot Y 위치 계산
+      const rateYMin = parseFloat(document.getElementById('rateYMin').value) || 1.0;
+      const rateYMax = parseFloat(document.getElementById('rateYMax').value) || 2.0;
+      const rateYRange = rateYMax - rateYMin;
+      const barsBottom = wrapRect.bottom - wrapRect.top; // 막대 하단 = 전체 높이
+
+      // 비율로 Y 좌표 계산 (아래가 최솟값, 위가 최댓값)
+      const dotLeftY  = rateYRange > 0
+        ? barsBottom - ((leftRate  - rateYMin) / rateYRange) * MAX_HEIGHT
+        : barsBottom - MAX_HEIGHT / 2;
+      const dotRightY = rateYRange > 0
+        ? barsBottom - ((rightRate - rateYMin) / rateYRange) * MAX_HEIGHT
+        : barsBottom - MAX_HEIGHT / 2;
+
+      const dotLeftX  = (leftRect.left  - wrapRect.left)  + leftRect.width  / 2;
+      const dotRightX = (rightRect.left - wrapRect.left) + rightRect.width / 2;
+
+      // dot HTML 위치도 업데이트
+      document.getElementById('dotLeft').style.top  = (dotLeftY  - (leftRect.top  - wrapRect.top) - 4.5) + 'px';
+      document.getElementById('dotRight').style.top = (dotRightY - (rightRect.top - wrapRect.top) - 4.5) + 'px';
+
+      // SVG 점선
+      svg.setAttribute('width',  wrapRect.width);
+      svg.setAttribute('height', wrapRect.height + 20);
+      svg.innerHTML = '';
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', dotLeftX);  line.setAttribute('y1', dotLeftY);
+      line.setAttribute('x2', dotRightX); line.setAttribute('y2', dotRightY);
+      line.setAttribute('stroke', '#222');
+      line.setAttribute('stroke-width', '2');
+      line.setAttribute('stroke-dasharray', '5,3');
+      svg.appendChild(line);
+
+      // 뱃지 중앙 배치
+      const midX = (dotLeftX + dotRightX) / 2;
+      const midY = (dotLeftY + dotRightY) / 2;
+      badge.style.visibility = 'hidden';
+      badge.style.top  = '0px';
+      badge.style.left = '0px';
+      requestAnimationFrame(() => {
+        const bw = badge.offsetWidth;
+        const bh = badge.offsetHeight;
+        badge.style.top  = (midY - bh / 2) + 'px';
+        badge.style.left = (midX - bw / 2) + 'px';
+        badge.style.transform = 'none';
+        badge.style.visibility = 'visible';
+      });
+
+      // dot 라벨 (기존 제거 후 재생성) - dot 바로 위에 배치
+      document.querySelectorAll('.dot-label').forEach(el => el.remove());
+      const container = barsArea.parentElement;
+
+      const lbl1 = document.createElement('div');
+      lbl1.className = 'dot-label';
+      lbl1.textContent = leftRate.toFixed(2) + '%';
+      lbl1.style.left = dotLeftX + 'px';
+      lbl1.style.top = '0px';
+      lbl1.style.visibility = 'hidden';
+      container.appendChild(lbl1);
+
+      const lbl2 = document.createElement('div');
+      lbl2.className = 'dot-label';
+      lbl2.textContent = rightRate.toFixed(2) + '%';
+      lbl2.style.left = dotRightX + 'px';
+      lbl2.style.top = '0px';
+      lbl2.style.visibility = 'hidden';
+      container.appendChild(lbl2);
+
+      requestAnimationFrame(() => {
+        const dotRadius = 4.5;
+        const gap = 4;
+        lbl1.style.top = (dotLeftY  - dotRadius - gap - lbl1.offsetHeight) + 'px';
+        lbl2.style.top = (dotRightY - dotRadius - gap - lbl2.offsetHeight) + 'px';
+        lbl1.style.visibility = 'visible';
+        lbl2.style.visibility = 'visible';
+      });
+
+      // x 라벨 위치
+      const labelLeft  = document.getElementById('labelLeft');
+      const labelRight = document.getElementById('labelRight');
+      const leftCX  = leftRect.left  - xWrapRect.left + leftRect.width  / 2;
+      const rightCX = rightRect.left - xWrapRect.left + rightRect.width / 2;
+      labelLeft.style.left  = leftCX  + 'px';
+      labelLeft.style.transform  = 'translateX(-50%)';
+      labelRight.style.left = rightCX + 'px';
+      labelRight.style.transform = 'translateX(-50%)';
+    }
+  }
+
+  window.onload = () => {
+    // 라벨 입력 시 폼 헤더 실시간 업데이트
+    document.getElementById('leftLabel').addEventListener('input', function() {});
+    document.getElementById('rightLabel').addEventListener('input', function() {});
+
+    updateChart();
+  };
+</script>
+</body>
+</html>
