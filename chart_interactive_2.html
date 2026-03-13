@@ -257,6 +257,21 @@
 
   <div class="form-divider"></div>
 
+  <!-- 범례 입력 -->
+  <div style="font-size:12px; font-weight:700; color:#888; margin-bottom:8px;">범례</div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>막대 범례</label>
+      <input type="text" id="legendBar" value="운완건수" placeholder="예: 운완건수">
+    </div>
+    <div class="form-group">
+      <label>선 범례</label>
+      <input type="text" id="legendLine" value="상담인입율" placeholder="예: 상담인입율">
+    </div>
+  </div>
+
+  <div class="form-divider"></div>
+
   <!-- 수치 입력 -->
   <div class="form-row">
     <div>
@@ -317,13 +332,13 @@
     <div class="legend">
       <div class="legend-item">
         <div class="legend-bar"></div>
-        <span>운완건수</span>
+        <span id="legendBarText">운완건수</span>
       </div>
       <div class="legend-item legend-line">
         <div class="legend-dot"></div>
         <div class="legend-dash"></div>
         <div class="legend-dot"></div>
-        <span style="margin-left:4px">상담인입율</span>
+        <span style="margin-left:4px" id="legendLineText">상담인입율</span>
       </div>
     </div>
 
@@ -382,6 +397,10 @@
 
     document.getElementById('barLeft').style.height  = leftH  + 'px';
     document.getElementById('barRight').style.height = rightH + 'px';
+
+    // 범례 업데이트
+    document.getElementById('legendBarText').textContent  = document.getElementById('legendBar').value  || '운완건수';
+    document.getElementById('legendLineText').textContent = document.getElementById('legendLine').value || '상담인입율';
 
     // x 라벨
     document.getElementById('labelLeft').textContent  = leftLbl;
