@@ -246,6 +246,23 @@
 
     <hr class="divider">
 
+    <!-- 범례 -->
+    <div class="section-title">🏷 범례</div>
+    <div class="two-col">
+      <div class="col-group prev-col">
+        <div class="col-header"><span class="prev">막대 (노랑/회색)</span></div>
+        <div class="input-row"><label>노랑</label><input type="text" id="legendGisaCount" value="기사 인입건수" style="text-align:left;"></div>
+        <div class="input-row"><label>회색</label><input type="text" id="legendCustomerCount" value="고객 인입건수" style="text-align:left;"></div>
+      </div>
+      <div class="col-group curr-col">
+        <div class="col-header"><span>선 (주황/검정)</span></div>
+        <div class="input-row"><label>주황</label><input type="text" id="legendGisaRate" value="기사 응대율" style="text-align:left;"></div>
+        <div class="input-row"><label>검정</label><input type="text" id="legendCustomerRate" value="고객 응대율" style="text-align:left;"></div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
     <!-- 응대율 -->
     <div class="section-title">📈 응대율</div>
     <div class="two-col">
@@ -382,20 +399,25 @@ function generateChart() {
   const customerCountColor = arrowColor(diffCustomerCount);
   const gisaCountColor = arrowColor(diffGisaCount);
 
+  const legendGisaCount     = document.getElementById('legendGisaCount').value;
+  const legendCustomerCount = document.getElementById('legendCustomerCount').value;
+  const legendGisaRate      = document.getElementById('legendGisaRate').value;
+  const legendCustomerRate  = document.getElementById('legendCustomerRate').value;
+
   const html = `
   <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:18px;font-size:16px;color:#333;">
     <div style="display:flex;gap:14px;justify-content:center;">
-      <div class="legend-item"><div class="legend-box" style="background:#F5C842;"></div><span>기사 인입건수</span></div>
-      <div class="legend-item"><div class="legend-box" style="background:#AAAAAA;"></div><span>고객 인입건수</span></div>
+      <div class="legend-item"><div class="legend-box" style="background:#F5C842;"></div><span>${legendGisaCount}</span></div>
+      <div class="legend-item"><div class="legend-box" style="background:#AAAAAA;"></div><span>${legendCustomerCount}</span></div>
     </div>
     <div style="display:flex;gap:14px;justify-content:center;">
       <div class="legend-item">
         <div class="legend-line" style="border-color:#E87722;"><div style="width:5px;height:5px;border-radius:50%;background:#E87722;position:absolute;"></div></div>
-        <span>기사 응대율</span>
+        <span>${legendGisaRate}</span>
       </div>
       <div class="legend-item">
         <div class="legend-line" style="border-color:#555;"><div style="width:5px;height:5px;border-radius:50%;background:#555;position:absolute;"></div></div>
-        <span>고객 응대율</span>
+        <span>${legendCustomerRate}</span>
       </div>
     </div>
   </div>
