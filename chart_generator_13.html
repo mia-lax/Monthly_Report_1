@@ -297,23 +297,6 @@
 
     <hr class="divider">
 
-    <!-- 소수점 설정 -->
-    <div class="section-title">🔢 소수점 자리수</div>
-    <div class="two-col">
-      <div class="col-group" style="background:#f3f0ff;border-radius:8px;padding:8px;">
-        <div class="col-header" style="color:#5e35b1;font-weight:700;font-size:12px;margin-bottom:6px;">변화 태그 (%p)</div>
-        <div class="input-row"><label>기사</label><input type="number" id="decimalDiffRateGisa" value="1" min="0" max="3" step="1"><span class="unit">자리</span></div>
-        <div class="input-row"><label>고객</label><input type="number" id="decimalDiffRateCustomer" value="1" min="0" max="3" step="1"><span class="unit">자리</span></div>
-      </div>
-      <div class="col-group" style="background:#f3f0ff;border-radius:8px;padding:8px;">
-        <div class="col-header" style="color:#5e35b1;font-weight:700;font-size:12px;margin-bottom:6px;">변화 태그 (%)</div>
-        <div class="input-row"><label>기사</label><input type="number" id="decimalDiffCountGisa" value="0" min="0" max="3" step="1"><span class="unit">자리</span></div>
-        <div class="input-row"><label>고객</label><input type="number" id="decimalDiffCountCustomer" value="0" min="0" max="3" step="1"><span class="unit">자리</span></div>
-      </div>
-    </div>
-
-    <hr class="divider">
-
     <!-- Y축 범위 -->
     <div class="section-title">⚙️ Y축 범위</div>
     <div class="two-col">
@@ -416,10 +399,10 @@ function generateChart() {
   const customerCountColor = arrowColor(diffCustomerCount);
   const gisaCountColor = arrowColor(diffGisaCount);
 
-  const decDiffRateGisa      = parseInt(document.getElementById('decimalDiffRateGisa').value);
-  const decDiffRateCustomer  = parseInt(document.getElementById('decimalDiffRateCustomer').value);
-  const decDiffCountGisa     = parseInt(document.getElementById('decimalDiffCountGisa').value);
-  const decDiffCountCustomer = parseInt(document.getElementById('decimalDiffCountCustomer').value);
+  const decDiffRateGisa      = 1;
+  const decDiffRateCustomer  = 1;
+  const decDiffCountGisa     = 0;
+  const decDiffCountCustomer = 0;
 
   const legendGisaCount     = document.getElementById('legendGisaCount').value;
   const legendCustomerCount = document.getElementById('legendCustomerCount').value;
@@ -429,17 +412,17 @@ function generateChart() {
   const html = `
   <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:18px;font-size:16px;color:#333;">
     <div style="display:flex;gap:14px;justify-content:center;">
-      <div class="legend-item"><div class="legend-box" style="background:#F5C842;"></div><span>${legendGisaCount}</span></div>
-      <div class="legend-item"><div class="legend-box" style="background:#AAAAAA;"></div><span>${legendCustomerCount}</span></div>
+      <div class="legend-item"><div class="legend-box" style="background:#F5C842;"></div><span contenteditable="true" style="outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${legendGisaCount}</span></div>
+      <div class="legend-item"><div class="legend-box" style="background:#AAAAAA;"></div><span contenteditable="true" style="outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${legendCustomerCount}</span></div>
     </div>
     <div style="display:flex;gap:14px;justify-content:center;">
       <div class="legend-item">
         <div class="legend-line" style="border-color:#E87722;"><div style="width:5px;height:5px;border-radius:50%;background:#E87722;position:absolute;"></div></div>
-        <span>${legendGisaRate}</span>
+        <span contenteditable="true" style="outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${legendGisaRate}</span>
       </div>
       <div class="legend-item">
         <div class="legend-line" style="border-color:#555;"><div style="width:5px;height:5px;border-radius:50%;background:#555;position:absolute;"></div></div>
-        <span>${legendCustomerRate}</span>
+        <span contenteditable="true" style="outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${legendCustomerRate}</span>
       </div>
     </div>
   </div>
@@ -455,46 +438,46 @@ function generateChart() {
     </svg>
 
     <!-- 고객(회색) 라벨: 점 위 -->
-    <div style="position:absolute;left:50px;top:${pCy}px;font-size:16px;font-weight:700;color:#333;transform:translateX(-50%) translateY(calc(-100% - 6px));">${pC}%</div>
-    <div style="position:absolute;left:270px;top:${cCy}px;font-size:16px;font-weight:700;color:#333;transform:translateX(-50%) translateY(calc(-100% - 6px));">${cC}%</div>
+    <div contenteditable="true" style="position:absolute;left:50px;top:${pCy}px;font-size:16px;font-weight:700;color:#333;transform:translateX(-50%) translateY(calc(-100% - 6px));outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${pC}%</div>
+    <div contenteditable="true" style="position:absolute;left:270px;top:${cCy}px;font-size:16px;font-weight:700;color:#333;transform:translateX(-50%) translateY(calc(-100% - 6px));outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${cC}%</div>
     <!-- 고객(회색) 태그: 선 위 -->
     <div style="position:absolute;left:50%;transform:translateX(-50%) translateY(calc(-100% - 4px));top:${midCy}px;">
-      <span class="badge gray-badge" style="background:${customerBadgeColor};">${arrow(diffCustomer)}${Math.abs(diffCustomer).toFixed(decDiffRateCustomer)}%p</span>
+      <span contenteditable="true" class="badge gray-badge" style="background:${customerBadgeColor};outline:none;cursor:text;">${arrow(diffCustomer)}${Math.abs(diffCustomer).toFixed(decDiffRateCustomer)}%p</span>
     </div>
 
     <!-- 기사(주황) 라벨: 점 아래 -->
-    <div style="position:absolute;left:50px;top:${pGy}px;font-size:16px;font-weight:700;color:#E87722;transform:translateX(-50%) translateY(6px);">${pG}%</div>
-    <div style="position:absolute;left:270px;top:${cGy}px;font-size:16px;font-weight:700;color:#E87722;transform:translateX(-50%) translateY(6px);">${cG}%</div>
+    <div contenteditable="true" style="position:absolute;left:50px;top:${pGy}px;font-size:16px;font-weight:700;color:#E87722;transform:translateX(-50%) translateY(6px);outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#E87722'" onmouseout="this.style.borderBottomColor='transparent'">${pG}%</div>
+    <div contenteditable="true" style="position:absolute;left:270px;top:${cGy}px;font-size:16px;font-weight:700;color:#E87722;transform:translateX(-50%) translateY(6px);outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#E87722'" onmouseout="this.style.borderBottomColor='transparent'">${cG}%</div>
     <!-- 기사(주황) 태그: 선 아래 -->
     <div style="position:absolute;left:50%;transform:translateX(-50%) translateY(4px);top:${midGy}px;">
-      <span class="badge orange-badge" style="background:${gisaBadgeColor};">${arrow(diffGisa)}${Math.abs(diffGisa).toFixed(decDiffRateGisa)}%p</span>
+      <span contenteditable="true" class="badge orange-badge" style="background:${gisaBadgeColor};outline:none;cursor:text;">${arrow(diffGisa)}${Math.abs(diffGisa).toFixed(decDiffRateGisa)}%p</span>
     </div>
   </div>
 
   <div style="position:relative;">
     <svg width="320" height="180" viewBox="0 0 320 180">
       <line x1="0" y1="180" x2="320" y2="180" stroke="#333" stroke-width="1.5"/>
-
       <polygon points="90,${pGTop} 230,${cGTop} 230,205 90,205" fill="#F5C842" opacity="0.4"/>
       <polygon points="90,${pCTop} 230,${cCTop} 230,${cGTop} 90,${pGTop}" fill="#AAAAAA" opacity="0.4"/>
-
       <rect x="30" y="${pGTop}" width="60" height="${pGH}" fill="#F5C842"/>
       <rect x="30" y="${pCTop}" width="60" height="${pCH}" fill="#AAAAAA"/>
       <rect x="230" y="${cGTop}" width="60" height="${cGH}" fill="#F5C842"/>
       <rect x="230" y="${cCTop}" width="60" height="${cCH}" fill="#AAAAAA"/>
-
-      <text x="60" y="${pCTop + pCH/2 + 6}" font-family="Apple SD Gothic Neo,Malgun Gothic,sans-serif" font-size="16" font-weight="700" fill="#333" text-anchor="middle">${fmt(pCC)}</text>
-      <text x="60" y="${pGTop + pGH/2 + 6}" font-family="Apple SD Gothic Neo,Malgun Gothic,sans-serif" font-size="16" font-weight="700" fill="#333" text-anchor="middle">${fmt(pGC)}</text>
-      <text x="260" y="${cCTop + cCH/2 + 6}" font-family="Apple SD Gothic Neo,Malgun Gothic,sans-serif" font-size="16" font-weight="700" fill="#333" text-anchor="middle">${fmt(cCC)}</text>
-      <text x="260" y="${cGTop + cGH/2 + 6}" font-family="Apple SD Gothic Neo,Malgun Gothic,sans-serif" font-size="16" font-weight="700" fill="#333" text-anchor="middle">${fmt(cGC)}</text>
-
-      <text x="160" y="${trapCustY + 6}" font-family="Apple SD Gothic Neo,Malgun Gothic,sans-serif" font-size="18" font-weight="700" fill="${customerCountColor}" text-anchor="middle">${arrow(diffCustomerCount)}${Math.abs(diffCustomerCount).toFixed(decDiffCountCustomer)}%</text>
-      <text x="160" y="${trapGisaY + 6}" font-family="Apple SD Gothic Neo,Malgun Gothic,sans-serif" font-size="18" font-weight="700" fill="${gisaCountColor}" text-anchor="middle">${arrow(diffGisaCount)}${Math.abs(diffGisaCount).toFixed(decDiffCountGisa)}%</text>
     </svg>
 
+    <!-- 막대 숫자: 절대위치 div로 -->
+    <div contenteditable="true" style="position:absolute;left:60px;top:${pCTop + pCH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;outline:none;cursor:text;white-space:nowrap;">${fmt(pCC)}</div>
+    <div contenteditable="true" style="position:absolute;left:60px;top:${pGTop + pGH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;outline:none;cursor:text;white-space:nowrap;">${fmt(pGC)}</div>
+    <div contenteditable="true" style="position:absolute;left:260px;top:${cCTop + cCH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;outline:none;cursor:text;white-space:nowrap;">${fmt(cCC)}</div>
+    <div contenteditable="true" style="position:absolute;left:260px;top:${cGTop + cGH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;outline:none;cursor:text;white-space:nowrap;">${fmt(cGC)}</div>
+
+    <!-- 사다리꼴 변화 % -->
+    <div contenteditable="true" style="position:absolute;left:160px;top:${trapCustY}px;transform:translate(-50%,-50%);font-size:18px;font-weight:700;color:${customerCountColor};outline:none;cursor:text;white-space:nowrap;">${arrow(diffCustomerCount)}${Math.abs(diffCustomerCount).toFixed(decDiffCountCustomer)}%</div>
+    <div contenteditable="true" style="position:absolute;left:160px;top:${trapGisaY}px;transform:translate(-50%,-50%);font-size:18px;font-weight:700;color:${gisaCountColor};outline:none;cursor:text;white-space:nowrap;">${arrow(diffGisaCount)}${Math.abs(diffGisaCount).toFixed(decDiffCountGisa)}%</div>
+
     <div style="display:flex;justify-content:space-between;margin-top:6px;">
-      <div class="month-label" style="width:120px;">${prevLabel}</div>
-      <div class="month-label" style="width:120px;">${currLabel}</div>
+      <div contenteditable="true" class="month-label" style="width:120px;outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${prevLabel}</div>
+      <div contenteditable="true" class="month-label" style="width:120px;outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${currLabel}</div>
     </div>
   </div>`;
 
@@ -502,7 +485,16 @@ function generateChart() {
 }
 
 function saveChart() {
-  const chart = document.getElementById('chartOutput').innerHTML;
+  const chartEl = document.getElementById('chartOutput').cloneNode(true);
+  chartEl.querySelectorAll('[contenteditable]').forEach(el => {
+    el.removeAttribute('contenteditable');
+    el.style.cursor = '';
+    el.style.outline = '';
+    el.onmouseover = null;
+    el.onmouseout = null;
+    el.style.borderBottom = '';
+  });
+  const chart = chartEl.innerHTML;
   const prevLabel = document.getElementById('prevLabel').value;
   const currLabel = document.getElementById('currLabel').value;
 
