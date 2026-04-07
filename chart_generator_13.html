@@ -482,6 +482,75 @@ function generateChart() {
   </div>`;
 
   document.getElementById('chartOutput').innerHTML = html;
+  makeDraggable();
+}
+
+function makeDraggable() {
+  const els = document.querySelectorAll('#chartOutput [contenteditable]');
+  els.forEach(el => {
+    let isDragging = false;
+    let startX, startY, origLeft, origTop;
+
+    el.addEventListener('mousedown', e => {
+      if (e.detail === 2) return;
+      isDragging = false;
+      startX = e.clientX;
+      startY = e.clientY;
+
+      const onMove = e => {
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        if (!isDragging && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+          isDragging = true;
+          el.blur();
+
+          // 드래그 시작 시점에 현재 화면 위치 기준으로 absolute 전환
+          const rect = el.getBoundingClientRect();
+          const parentRect = el.offsetParent.getBoundingClientRect();
+          const left = rect.left - parentRect.left;
+          const top  = rect.top  - parentRect.top;
+
+          el.style.position  = 'absolute';
+          el.style.transform = 'none';
+          el.style.left      = left + 'px';
+          el.style.top       = top  + 'px';
+          el.style.margin    = '0';
+
+          origLeft = left;
+          origTop  = top;
+          el.style.cursor = 'grabbing';
+        }
+
+        if (isDragging) {
+          el.style.left = (origLeft + dx) + 'px';
+          el.style.top  = (origTop  + dy) + 'px';
+        }
+      };
+
+      const onUp = () => {
+        if (!isDragging) {
+          el.focus();
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          range.collapse(false);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        el.style.cursor = 'grab';
+        isDragging = false;
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      e.preventDefault();
+    });
+
+    el.style.cursor = 'grab';
+  });
 }
 
 function saveChart() {
@@ -493,6 +562,7 @@ function saveChart() {
     el.onmouseover = null;
     el.onmouseout = null;
     el.style.borderBottom = '';
+    el.style.userSelect = '';
   });
   const chart = chartEl.innerHTML;
   const prevLabel = document.getElementById('prevLabel').value;
