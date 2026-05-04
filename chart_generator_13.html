@@ -6,427 +6,535 @@
 <title>월간 보고서 그래프 생성기</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-    background: #f4f6f9;
-    min-height: 100vh;
-    padding: 30px 20px;
-  }
+  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #f4f6f9; min-height: 100vh; padding: 24px 20px; }
 
-  h1 {
-    text-align: center;
-    font-size: 20px;
-    color: #222;
-    margin-bottom: 24px;
-    font-weight: 700;
-  }
+  h1 { text-align: center; font-size: 20px; color: #222; margin-bottom: 20px; font-weight: 700; }
 
-  .layout {
-    display: flex;
-    gap: 32px;
-    justify-content: center;
-    align-items: flex-start;
-    flex-wrap: wrap;
+  /* ── 탭 ── */
+  .tabs { display: flex; justify-content: center; gap: 0; margin-bottom: 24px; }
+  .tab-btn {
+    padding: 10px 32px; font-size: 14px; font-weight: 700; cursor: pointer;
+    border: 2px solid #ddd; background: #f4f6f9; color: #888;
+    font-family: inherit; transition: all 0.15s;
   }
+  .tab-btn:first-child { border-radius: 8px 0 0 8px; }
+  .tab-btn:last-child  { border-radius: 0 8px 8px 0; border-left: none; }
+  .tab-btn.active { background: #333; color: white; border-color: #333; }
 
-  /* 입력 폼 */
-  .form-panel {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    width: 520px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
 
-  .form-panel h2 {
-    font-size: 15px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #f0f0f0;
-  }
+  /* ── 공통 레이아웃 ── */
+  .layout { display: flex; gap: 24px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
 
-  .section-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #555;
-    margin-bottom: 8px;
-  }
+  .form-panel { background: white; border-radius: 12px; padding: 24px; width: 620px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .form-panel h2 { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; }
+  .section-title { font-size: 13px; font-weight: 700; color: #555; margin-bottom: 8px; }
 
-  .two-col {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 4px;
-  }
+  .three-col { display: flex; gap: 8px; margin-bottom: 4px; }
+  .two-col   { display: flex; gap: 8px; margin-bottom: 4px; }
+  .col-group { flex: 1; }
+  .prev-col  { background: #f9f9f9; border-radius: 8px; padding: 8px; }
+  .curr-col  { background: #FFFDE7; border-radius: 8px; padding: 8px; }
+  .last-col  { background: #FFF3E0; border-radius: 8px; padding: 8px; }
 
-  .col-group {
-    flex: 1;
-  }
+  .col-header { margin-bottom: 6px; }
+  .col-header span { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; display: inline-block; }
+  .col-header span.prev { background: #e0e0e0; color: #555; }
+  .col-header span.curr { background: #F5C842; color: #333; }
+  .col-header span.last { background: #FFB74D; color: #333; }
 
-  .prev-col { background: #f9f9f9; border-radius: 8px; padding: 8px; }
-  .curr-col { background: #FFFDE7; border-radius: 8px; padding: 8px; }
+  .input-row { display: flex; align-items: center; margin-bottom: 6px; gap: 4px; }
+  .input-row label { font-size: 11px; color: #444; width: 36px; flex-shrink: 0; }
+  .input-row input { flex: 1; min-width: 0; padding: 5px 6px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 12px; font-family: inherit; color: #222; transition: border-color 0.2s; text-align: right; }
+  .input-row input:focus { outline: none; border-color: #F5C842; }
+  .unit { font-size: 11px; color: #888; width: 16px; text-align: left; margin-left: 2px; }
+  .divider { border: none; border-top: 1px dashed #eee; margin: 14px 0; }
 
-  .col-header {
-    margin-bottom: 6px;
-  }
-
-  .month-group {
-    margin-bottom: 20px;
-  }
-
-  .month-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #555;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .month-title span {
-    background: #F5C842;
-    color: #333;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-  }
-  .month-title span.prev { background: #e0e0e0; }
-
-  .input-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    gap: 4px;
-  }
-
-  .input-row label {
-    font-size: 12px;
-    color: #444;
-    width: 40px;
-    flex-shrink: 0;
-  }
-
-  .input-row input {
-    flex: 1;
-    min-width: 0;
-    padding: 5px 6px;
-    border: 1.5px solid #ddd;
-    border-radius: 6px;
-    font-size: 13px;
-    font-family: inherit;
-    color: #222;
-    transition: border-color 0.2s;
-    text-align: right;
-  }
-
-  .input-row input:focus {
-    outline: none;
-    border-color: #F5C842;
-  }
-
-  .unit {
-    font-size: 12px;
-    color: #888;
-    width: 20px;
-    text-align: left;
-    margin-left: 4px;
-  }
-
-  .divider {
-    border: none;
-    border-top: 1px dashed #eee;
-    margin: 16px 0;
-  }
-
-  .btn-generate {
-    width: 100%;
-    padding: 12px;
-    background: #333;
-    color: white;
-    font-size: 15px;
-    font-weight: 700;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: inherit;
-    margin-top: 4px;
-    transition: background 0.2s;
-  }
+  .btn-generate { width: 100%; padding: 12px; background: #333; color: white; font-size: 15px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; margin-top: 8px; transition: background 0.2s; }
   .btn-generate:hover { background: #111; }
 
-  /* 미리보기 */
-  .preview-panel {
-    background: white;
-    border-radius: 12px;
-    padding: 28px 24px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  .settings-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; font-size: 13px; font-weight: 700; color: #555; padding: 8px 0; }
+  .settings-toggle:hover { color: #333; }
+  .settings-arrow { font-size: 10px; transition: transform 0.2s; display: inline-block; }
+  .settings-arrow.open { transform: rotate(90deg); }
+  .settings-body { display: none; margin-top: 8px; }
+  .settings-body.open { display: block; }
 
-  .preview-panel h2 {
-    font-size: 15px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 20px;
-    align-self: flex-start;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #f0f0f0;
-    width: 100%;
-  }
-
-  /* 그래프 스타일 */
-  .chart-wrap { width: 320px; background: white; }
-
-  .legend-item { display: flex; align-items: center; gap: 5px; }
-  .legend-box { width: 18px; height: 10px; border-radius: 2px; }
-  .legend-line {
-    width: 18px; height: 0;
-    border-top: 2px dashed;
-    position: relative;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  .badge {
-    display: inline-flex; align-items: center; gap: 3px;
-    font-size: 18px; font-weight: 700;
-    padding: 3px 8px; border-radius: 3px; color: white;
-    white-space: nowrap;
-  }
-  .badge.gray-badge { background: #555; }
-  .badge.orange-badge { background: #E87722; }
-
-  .rate-section { position: relative; height: 110px; margin-bottom: 10px; }
-
-  .month-label { font-size: 16px; color: #333; font-weight: 500; text-align: center; }
-
-  /* 저장 버튼 */
-  .btn-save {
-    margin-top: 16px;
-    padding: 9px 24px;
-    background: #F5C842;
-    color: #333;
-    font-size: 14px;
-    font-weight: 700;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background 0.2s;
-  }
+  /* ── 미리보기 공통 ── */
+  .preview-panel { background: white; border-radius: 12px; padding: 28px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; }
+  .preview-panel h2 { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 20px; align-self: flex-start; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; width: 100%; }
+  .charts-row { display: flex; gap: 32px; align-items: flex-start; }
+  .chart-block { display: flex; flex-direction: column; align-items: center; }
+  .chart-block-title { font-size: 12px; font-weight: 700; color: #666; margin-bottom: 30px; text-align: center; background: #f4f6f9; padding: 3px 14px; border-radius: 10px; }
+  .save-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-save { padding: 9px 18px; background: #F5C842; color: #333; font-size: 13px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; transition: background 0.2s; }
   .btn-save:hover { background: #e0b800; }
+  .btn-save.secondary { background: #FFB74D; }
+  .btn-save.secondary:hover { background: #e6a040; }
+
+  /* ── 응대율 그래프 스타일 ── */
+  .chart-wrap-rate { width: 320px; background: white; position: relative; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-box  { width: 18px; height: 10px; border-radius: 2px; }
+  .legend-line-dash { width: 18px; height: 0; border-top: 2px dashed; position: relative; display: flex; align-items: center; justify-content: center; }
+  .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 18px; font-weight: 700; padding: 3px 8px; border-radius: 3px; color: white; white-space: nowrap; }
+  .rate-section { position: relative; height: 110px; margin-bottom: 10px; }
+  .month-label  { font-size: 16px; color: #333; font-weight: 500; text-align: center; }
+
+  /* ── 인입률 그래프 스타일 ── */
+  .inip-wrap { width: 360px; background: white; position: relative; }
+  .inip-legend { display: flex; gap: 16px; margin-bottom: 60px; font-size: 14px; color: #333; align-items: center; justify-content: center; }
+  .inip-legend-bar  { width: 18px; height: 12px; background: #F5C400; }
+  .inip-legend-bar2 { width: 18px; height: 12px; background: #AAAAAA; }
+  .inip-legend-dot  { width: 7px; height: 7px; background: #222; border-radius: 50%; }
+  .inip-legend-dash { width: 14px; height: 2px; border-top: 2px dashed #222; }
+  .inip-chart-outer { display: flex; align-items: flex-end; gap: 6px; }
+  .inip-bars-area   { display: flex; align-items: flex-end; justify-content: center; gap: 120px; height: 180px; position: relative; z-index: 1; flex: 1; }
+  .inip-bar-col     { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 180px; position: relative; }
+  .inip-bar-left    { width: 60px; background: #AAAAAA; position: relative; }
+  .inip-bar-right   { width: 60px; background: #F5C400; position: relative; }
+  .inip-dot         { width: 9px; height: 9px; background: #222; border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%); }
+  .inip-dot-label   { position: absolute; font-size: 16px; font-weight: 700; color: #222; white-space: nowrap; transform: translateX(-50%); pointer-events: none; z-index: 10; }
+  .inip-badge       { position: absolute; background: #222; color: #fff; font-size: 16px; font-weight: 700; padding: 4px 8px; white-space: nowrap; border-radius: 4px; z-index: 10; }
+  .inip-x-label     { font-size: 15px; color: #333; text-align: center; position: absolute; white-space: nowrap; transform: translateX(-50%); }
+  .inip-connector   { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 10; }
 </style>
 </head>
 <body>
 
 <h1>📊 월간 보고서 그래프 생성기</h1>
 
+<!-- 공통 붙여넣기 박스 -->
+<div style="max-width:660px;margin:0 auto 20px;background:#f0f7ff;border:1.5px dashed #90c8f0;border-radius:8px;padding:12px;">
+  <div style="font-size:12px;font-weight:700;color:#1a6fa8;margin-bottom:6px;">📋 구글시트에서 한번에 붙여넣기 (응대율 + 인입률 동시 적용)</div>
+  <div style="font-size:11px;color:#555;margin-bottom:8px;">구글시트 표 전체 Ctrl+C → 아래 칸에 Ctrl+V</div>
+  <textarea id="pasteArea" rows="4" placeholder="여기에 붙여넣기 (Ctrl+V)" style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;color:#333;"></textarea>
+  <button onclick="parseAll()" style="margin-top:6px;padding:6px 16px;background:#1a6fa8;color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">자동 입력</button>
+  <span id="parseMsg" style="font-size:11px;margin-left:8px;color:#888;"></span>
+</div>
+
+<!-- 탭 버튼 -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('rate')">📈 응대율 그래프</button>
+  <button class="tab-btn"        onclick="switchTab('inip')">📊 인입률 그래프</button>
+</div>
+
+<!-- ════════════════════════════════════════
+     탭 A: 응대율 그래프
+════════════════════════════════════════ -->
+<div id="tab-rate" class="tab-content active">
 <div class="layout">
 
-  <!-- 입력 폼 -->
   <div class="form-panel">
     <h2>📝 수치 입력</h2>
 
-    <!-- 월 입력 -->
     <div class="section-title">📅 기간</div>
-    <div class="two-col">
+    <div class="three-col">
       <div class="col-group prev-col">
-        <div class="col-header"><span class="prev">이전 달/년</span></div>
-        <div class="input-row"><input type="text" id="prevLabel" value="26년 1월" placeholder="예: 26년 1월" style="width:100%;text-align:left;"></div>
+        <div class="col-header"><span class="prev">이전 달</span></div>
+        <div class="input-row"><input type="text" id="r-prevLabel" value="" style="text-align:left;"></div>
       </div>
       <div class="col-group curr-col">
-        <div class="col-header"><span>이번 달</span></div>
-        <div class="input-row"><input type="text" id="currLabel" value="26년 2월" placeholder="예: 26년 2월" style="width:100%;text-align:left;"></div>
+        <div class="col-header"><span class="curr">이번 달</span></div>
+        <div class="input-row"><input type="text" id="r-currLabel" value="" style="text-align:left;"></div>
+      </div>
+      <div class="col-group last-col">
+        <div class="col-header"><span class="last">작년 동월</span></div>
+        <div class="input-row"><input type="text" id="r-lastLabel" value="" style="text-align:left;"></div>
       </div>
     </div>
 
     <hr class="divider">
 
-    <!-- 범례 -->
-    <div class="section-title">🏷 범례</div>
-    <div class="two-col">
-      <div class="col-group prev-col">
-        <div class="col-header"><span class="prev">막대 (노랑/회색)</span></div>
-        <div class="input-row"><label>노랑</label><input type="text" id="legendGisaCount" value="기사 인입건수" style="text-align:left;"></div>
-        <div class="input-row"><label>회색</label><input type="text" id="legendCustomerCount" value="고객 인입건수" style="text-align:left;"></div>
-      </div>
-      <div class="col-group curr-col">
-        <div class="col-header"><span>선 (주황/검정)</span></div>
-        <div class="input-row"><label>주황</label><input type="text" id="legendGisaRate" value="기사 응대율" style="text-align:left;"></div>
-        <div class="input-row"><label>검정</label><input type="text" id="legendCustomerRate" value="고객 응대율" style="text-align:left;"></div>
-      </div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- 응대율 -->
-    <div class="section-title">📈 응대율</div>
-    <div class="two-col">
-      <div class="col-group prev-col">
-        <div class="col-header"><span class="prev">이전 달/년</span></div>
-        <div class="input-row"><label>기사</label><input type="number" id="prevGisa" value="94.5" step="0.1" min="0" max="100"><span class="unit">%</span></div>
-        <div class="input-row"><label>고객</label><input type="number" id="prevCustomer" value="96.5" step="0.1" min="0" max="100"><span class="unit">%</span></div>
-      </div>
-      <div class="col-group curr-col">
-        <div class="col-header"><span>이번 달</span></div>
-        <div class="input-row"><label>기사</label><input type="number" id="currGisa" value="93.4" step="0.1" min="0" max="100"><span class="unit">%</span></div>
-        <div class="input-row"><label>고객</label><input type="number" id="currCustomer" value="96.2" step="0.1" min="0" max="100"><span class="unit">%</span></div>
-      </div>
-    </div>
-
-    <hr class="divider">
-
-    <!-- 인입건수 -->
     <div class="section-title">📦 인입건수</div>
-    <div class="two-col">
+    <div class="three-col">
       <div class="col-group prev-col">
-        <div class="col-header"><span class="prev">이전 달/년</span></div>
-        <div class="input-row"><label>기사</label><input type="number" id="prevGisaCount" value="30760"><span class="unit">건</span></div>
-        <div class="input-row"><label>고객</label><input type="number" id="prevCustomerCount" value="11912"><span class="unit">건</span></div>
+        <div class="col-header"><span class="prev">이전 달</span></div>
+        <div class="input-row"><label>기사</label><input type="number" id="r-prevGisaCount" value=""><span class="unit">건</span></div>
+        <div class="input-row"><label>고객</label><input type="number" id="r-prevCustomerCount" value=""><span class="unit">건</span></div>
       </div>
       <div class="col-group curr-col">
-        <div class="col-header"><span>이번 달</span></div>
-        <div class="input-row"><label>기사</label><input type="number" id="currGisaCount" value="26370"><span class="unit">건</span></div>
-        <div class="input-row"><label>고객</label><input type="number" id="currCustomerCount" value="10339"><span class="unit">건</span></div>
+        <div class="col-header"><span class="curr">이번 달</span></div>
+        <div class="input-row"><label>기사</label><input type="number" id="r-currGisaCount" value=""><span class="unit">건</span></div>
+        <div class="input-row"><label>고객</label><input type="number" id="r-currCustomerCount" value=""><span class="unit">건</span></div>
+      </div>
+      <div class="col-group last-col">
+        <div class="col-header"><span class="last">작년 동월</span></div>
+        <div class="input-row"><label>기사</label><input type="number" id="r-lastGisaCount" value=""><span class="unit">건</span></div>
+        <div class="input-row"><label>고객</label><input type="number" id="r-lastCustomerCount" value=""><span class="unit">건</span></div>
       </div>
     </div>
 
     <hr class="divider">
 
-    <!-- Y축 범위 -->
-    <div class="section-title">⚙️ Y축 범위</div>
-    <div class="two-col">
-      <div class="col-group" style="background:#e8f4fd;border-radius:8px;padding:8px;">
-        <div class="col-header" style="color:#1a6fa8;font-weight:700;font-size:12px;margin-bottom:6px;">선그래프 (%)</div>
-        <div class="input-row"><label>최솟값</label><input type="number" id="yMin" value="93" step="1" min="0" max="100"><span class="unit">%</span></div>
-        <div class="input-row"><label>최댓값</label><input type="number" id="yMax" value="98" step="1" min="0" max="100"><span class="unit">%</span></div>
+    <div class="section-title">📈 응대율</div>
+    <div class="three-col">
+      <div class="col-group prev-col">
+        <div class="col-header"><span class="prev">이전 달</span></div>
+        <div class="input-row"><label>기사</label><input type="number" id="r-prevGisa" value="" step="0.1"><span class="unit">%</span></div>
+        <div class="input-row"><label>고객</label><input type="number" id="r-prevCustomer" value="" step="0.1"><span class="unit">%</span></div>
       </div>
-      <div class="col-group" style="background:#e8f4fd;border-radius:8px;padding:8px;">
-        <div class="col-header" style="color:#1a6fa8;font-weight:700;font-size:12px;margin-bottom:6px;">막대그래프 (건)</div>
-        <div class="input-row"><label>최솟값</label><input type="number" id="barYMin" value="0" step="1000"><span class="unit">건</span></div>
-        <div class="input-row"><label>최댓값</label><input type="number" id="barYMax" value="50000" step="1000"><span class="unit">건</span></div>
+      <div class="col-group curr-col">
+        <div class="col-header"><span class="curr">이번 달</span></div>
+        <div class="input-row"><label>기사</label><input type="number" id="r-currGisa" value="" step="0.1"><span class="unit">%</span></div>
+        <div class="input-row"><label>고객</label><input type="number" id="r-currCustomer" value="" step="0.1"><span class="unit">%</span></div>
+      </div>
+      <div class="col-group last-col">
+        <div class="col-header"><span class="last">작년 동월</span></div>
+        <div class="input-row"><label>기사</label><input type="number" id="r-lastGisa" value="" step="0.1"><span class="unit">%</span></div>
+        <div class="input-row"><label>고객</label><input type="number" id="r-lastCustomer" value="" step="0.1"><span class="unit">%</span></div>
       </div>
     </div>
 
-    <button class="btn-generate" onclick="generateChart()">그래프 생성</button>
+    <hr class="divider">
+
+    <div class="settings-toggle" onclick="toggleSettings('r')">
+      <span class="settings-arrow" id="r-settingsArrow">▶</span>
+      ⚙️ 기타 설정 (범례 · Y축 범위)
+    </div>
+    <div class="settings-body" id="r-settingsBody">
+      <div class="section-title" style="margin-top:8px;">🏷 범례</div>
+      <div class="three-col">
+        <div class="col-group prev-col" style="flex:1.5;">
+          <div class="col-header"><span class="prev">막대 (노랑/회색)</span></div>
+          <div class="input-row"><label>노랑</label><input type="text" id="r-legendGisaCount" value="기사 인입건수" style="text-align:left;"></div>
+          <div class="input-row"><label>회색</label><input type="text" id="r-legendCustomerCount" value="고객 인입건수" style="text-align:left;"></div>
+        </div>
+        <div class="col-group curr-col" style="flex:1.5;">
+          <div class="col-header"><span class="curr">선 (주황/검정)</span></div>
+          <div class="input-row"><label>주황</label><input type="text" id="r-legendGisaRate" value="기사 응대율" style="text-align:left;"></div>
+          <div class="input-row"><label>검정</label><input type="text" id="r-legendCustomerRate" value="고객 응대율" style="text-align:left;"></div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="section-title">📐 Y축 범위</div>
+      <div class="three-col">
+        <div class="col-group" style="background:#e8f4fd;border-radius:8px;padding:8px;">
+          <div class="col-header" style="color:#1a6fa8;font-weight:700;font-size:11px;margin-bottom:6px;">선그래프 (%)</div>
+          <div class="input-row"><label>최솟값</label><input type="number" id="r-yMin" value="" step="1"><span class="unit">%</span></div>
+          <div class="input-row"><label>최댓값</label><input type="number" id="r-yMax" value="" step="1"><span class="unit">%</span></div>
+        </div>
+        <div class="col-group" style="background:#e8f4fd;border-radius:8px;padding:8px;">
+          <div class="col-header" style="color:#1a6fa8;font-weight:700;font-size:11px;margin-bottom:6px;">막대그래프 (건)</div>
+          <div class="input-row"><label>최솟값</label><input type="number" id="r-barYMin" value="" step="1000"><span class="unit">건</span></div>
+          <div class="input-row"><label>최댓값</label><input type="number" id="r-barYMax" value="" step="1000"><span class="unit">건</span></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-generate" onclick="rGenerateChart()">그래프 생성</button>
   </div>
 
-  <!-- 미리보기 -->
   <div class="preview-panel">
     <h2>👁 미리보기</h2>
-    <div id="chartOutput" class="chart-wrap"></div>
-    <button class="btn-save" onclick="saveChart()">💾 HTML로 저장</button>
+    <div class="charts-row">
+      <div class="chart-block">
+        <div class="chart-block-title">이전 달 vs 이번 달</div>
+        <div id="r-chartA" class="chart-wrap-rate"></div>
+      </div>
+      <div class="chart-block">
+        <div class="chart-block-title">작년 동월 vs 이번 달</div>
+        <div id="r-chartB" class="chart-wrap-rate"></div>
+      </div>
+    </div>
+    <div class="save-btns">
+      <button class="btn-save"           onclick="rSaveChart('A')">💾 이전달비교 저장</button>
+      <button class="btn-save secondary" onclick="rSaveChart('B')">💾 작년동월비교 저장</button>
+    </div>
   </div>
 
 </div>
+</div>
 
-<script>
-function fmt(n) {
-  return Number(n).toLocaleString('ko-KR');
-}
+<!-- ════════════════════════════════════════
+     탭 B: 인입률 그래프
+════════════════════════════════════════ -->
+<div id="tab-inip" class="tab-content">
+<div class="layout">
 
-function arrow(diff) {
-  return diff >= 0 ? '▲' : '▼';
-}
+  <div class="form-panel">
+    <h2>📝 수치 입력</h2>
 
-function arrowColor(diff) {
-  return diff >= 0 ? '#E53935' : '#2563EB';
-}
-
-function generateChart() {
-  const prevLabel = document.getElementById('prevLabel').value;
-  const currLabel = document.getElementById('currLabel').value;
-
-  const pG  = parseFloat(document.getElementById('prevGisa').value);
-  const pC  = parseFloat(document.getElementById('prevCustomer').value);
-  const cG  = parseFloat(document.getElementById('currGisa').value);
-  const cC  = parseFloat(document.getElementById('currCustomer').value);
-
-  const pGC = parseInt(document.getElementById('prevGisaCount').value);
-  const pCC = parseInt(document.getElementById('prevCustomerCount').value);
-  const cGC = parseInt(document.getElementById('currGisaCount').value);
-  const cCC = parseInt(document.getElementById('currCustomerCount').value);
-
-  // 변화량
-  const diffGisa     = cG  - pG;
-  const diffCustomer = cC  - pC;
-  const diffGisaCount     = (cGC - pGC) / pGC * 100;
-  const diffCustomerCount = (cCC - pCC) / pCC * 100;
-
-  // 선그래프 y좌표 (입력받은 Y축 범위, height=60, top=10)
-  const MIN_R = parseFloat(document.getElementById('yMin').value);
-  const MAX_R = parseFloat(document.getElementById('yMax').value);
-  const TOP = 28, H = 60;
-  function rateY(val) {
-    return (MAX_R - val) / (MAX_R - MIN_R) * H + TOP;
-  }
-
-  const pCy = rateY(pC); // 이전 고객
-  const cCy = rateY(cC); // 현재 고객
-  const pGy = rateY(pG); // 이전 기사
-  const cGy = rateY(cG); // 현재 기사
-
-  const midCy = (pCy + cCy) / 2;
-  const midGy = (pGy + cGy) / 2;
-
-  // 막대 높이 (입력받은 Y축 범위 기준)
-  const barYMin = parseInt(document.getElementById('barYMin').value);
-  const barYMax = parseInt(document.getElementById('barYMax').value);
-  const scale = 170 / (barYMax - barYMin);
-
-  const pGH = Math.round((pGC - barYMin) * scale);
-  const pCH = Math.round(pCC * scale);
-  const cGH = Math.round((cGC - barYMin) * scale);
-  const cCH = Math.round(cCC * scale);
-
-  const SVG_H = 180;
-  const pGTop  = SVG_H - pGH;
-  const pCTop  = pGTop - pCH;
-  const cGTop  = SVG_H - cGH;
-  const cCTop  = cGTop - cCH;
-
-  // 사다리꼴 y좌표 중앙
-  const trapCustMidY = (pCTop + cCTop) / 2 + (pGTop + cGTop) / 2;
-  const trapCustY = ((pCTop + cCTop) / 2 + (pGTop + cGTop) / 2) / 2;
-  const trapGisaY = ((pGTop + cGTop) / 2 + SVG_H) / 2;
-
-  const customerBadgeColor = '#555';      // 고객(회색) 선 색상
-  const gisaBadgeColor = '#E87722';       // 기사(주황) 선 색상
-  const customerCountColor = arrowColor(diffCustomerCount);
-  const gisaCountColor = arrowColor(diffGisaCount);
-
-  const decDiffRateGisa      = 1;
-  const decDiffRateCustomer  = 1;
-  const decDiffCountGisa     = 0;
-  const decDiffCountCustomer = 0;
-
-  const legendGisaCount     = document.getElementById('legendGisaCount').value;
-  const legendCustomerCount = document.getElementById('legendCustomerCount').value;
-  const legendGisaRate      = document.getElementById('legendGisaRate').value;
-  const legendCustomerRate  = document.getElementById('legendCustomerRate').value;
-
-  const html = `
-  <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:18px;font-size:16px;color:#333;">
-    <div style="display:flex;gap:14px;justify-content:center;">
-      <div class="legend-item"><div class="legend-box" style="background:#F5C842;"></div><span contenteditable="true" style="outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${legendGisaCount}</span></div>
-      <div class="legend-item"><div class="legend-box" style="background:#AAAAAA;"></div><span contenteditable="true" style="outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${legendCustomerCount}</span></div>
+    <div class="section-title">📅 기간</div>
+    <div class="three-col">
+      <div class="col-group prev-col">
+        <div class="col-header"><span class="prev">이전 달</span></div>
+        <div class="input-row"><input type="text" id="i-prevLabel" value="" style="text-align:left;"></div>
+      </div>
+      <div class="col-group curr-col">
+        <div class="col-header"><span class="curr">이번 달</span></div>
+        <div class="input-row"><input type="text" id="i-currLabel" value="" style="text-align:left;"></div>
+      </div>
+      <div class="col-group last-col">
+        <div class="col-header"><span class="last">작년 동월</span></div>
+        <div class="input-row"><input type="text" id="i-lastLabel" value="" style="text-align:left;"></div>
+      </div>
     </div>
-    <div style="display:flex;gap:14px;justify-content:center;">
-      <div class="legend-item">
-        <div class="legend-line" style="border-color:#E87722;"><div style="width:5px;height:5px;border-radius:50%;background:#E87722;position:absolute;"></div></div>
-        <span contenteditable="true" style="outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${legendGisaRate}</span>
+
+    <hr class="divider">
+
+    <div class="section-title">🚗 운행완료 건수</div>
+    <div class="three-col">
+      <div class="col-group prev-col">
+        <div class="col-header"><span class="prev">이전 달</span></div>
+        <div class="input-row"><input type="number" id="i-prevCount" value="" style="text-align:right;"><span class="unit">건</span></div>
       </div>
-      <div class="legend-item">
-        <div class="legend-line" style="border-color:#555;"><div style="width:5px;height:5px;border-radius:50%;background:#555;position:absolute;"></div></div>
-        <span contenteditable="true" style="outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${legendCustomerRate}</span>
+      <div class="col-group curr-col">
+        <div class="col-header"><span class="curr">이번 달</span></div>
+        <div class="input-row"><input type="number" id="i-currCount" value="" style="text-align:right;"><span class="unit">건</span></div>
       </div>
+      <div class="col-group last-col">
+        <div class="col-header"><span class="last">작년 동월</span></div>
+        <div class="input-row"><input type="number" id="i-lastCount" value="" style="text-align:right;"><span class="unit">건</span></div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-title">📞 상담인입률</div>
+    <div class="three-col">
+      <div class="col-group prev-col">
+        <div class="col-header"><span class="prev">이전 달</span></div>
+        <div class="input-row"><input type="number" id="i-prevRate" value="" step="0.01" style="text-align:right;"><span class="unit">%</span></div>
+      </div>
+      <div class="col-group curr-col">
+        <div class="col-header"><span class="curr">이번 달</span></div>
+        <div class="input-row"><input type="number" id="i-currRate" value="" step="0.01" style="text-align:right;"><span class="unit">%</span></div>
+      </div>
+      <div class="col-group last-col">
+        <div class="col-header"><span class="last">작년 동월</span></div>
+        <div class="input-row"><input type="number" id="i-lastRate" value="" step="0.01" style="text-align:right;"><span class="unit">%</span></div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="settings-toggle" onclick="toggleSettings('i')">
+      <span class="settings-arrow" id="i-settingsArrow">▶</span>
+      ⚙️ 기타 설정 (범례 · Y축 범위)
+    </div>
+    <div class="settings-body" id="i-settingsBody">
+      <div class="section-title" style="margin-top:8px;">🏷 범례</div>
+      <div class="two-col">
+        <div class="col-group prev-col">
+          <div class="col-header"><span class="prev">막대</span></div>
+          <div class="input-row"><input type="text" id="i-legendBar" value="운완건수" style="text-align:left;"></div>
+        </div>
+        <div class="col-group curr-col">
+          <div class="col-header"><span class="curr">선</span></div>
+          <div class="input-row"><input type="text" id="i-legendLine" value="상담인입률" style="text-align:left;"></div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="section-title">📐 Y축 범위</div>
+      <div class="three-col">
+        <div class="col-group" style="background:#e8f4fd;border-radius:8px;padding:8px;">
+          <div class="col-header" style="color:#1a6fa8;font-weight:700;font-size:11px;margin-bottom:6px;">운완건수 (건)</div>
+          <div class="input-row"><label>최솟값</label><input type="number" id="i-barYMin" value="" step="100000"><span class="unit">건</span></div>
+          <div class="input-row"><label>최댓값</label><input type="number" id="i-barYMax" value="" step="100000"><span class="unit">건</span></div>
+        </div>
+        <div class="col-group" style="background:#e8f4fd;border-radius:8px;padding:8px;">
+          <div class="col-header" style="color:#1a6fa8;font-weight:700;font-size:11px;margin-bottom:6px;">상담인입률 (%)</div>
+          <div class="input-row"><label>최솟값</label><input type="number" id="i-rateYMin" value="" step="0.1"><span class="unit">%</span></div>
+          <div class="input-row"><label>최댓값</label><input type="number" id="i-rateYMax" value="" step="0.1"><span class="unit">%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-generate" onclick="iGenerateChart()">그래프 생성</button>
+  </div>
+
+  <div class="preview-panel">
+    <h2>👁 미리보기</h2>
+    <div class="charts-row">
+      <div class="chart-block">
+        <div class="chart-block-title">이전 달 vs 이번 달</div>
+        <div id="i-chartA" class="inip-wrap"></div>
+      </div>
+      <div class="chart-block">
+        <div class="chart-block-title">작년 동월 vs 이번 달</div>
+        <div id="i-chartB" class="inip-wrap"></div>
+      </div>
+    </div>
+    <div class="save-btns">
+      <button class="btn-save"           onclick="iSaveChart('A')">💾 이전달비교 저장</button>
+      <button class="btn-save secondary" onclick="iSaveChart('B')">💾 작년동월비교 저장</button>
     </div>
   </div>
 
+</div>
+</div>
+
+<script>
+/* ══════════════════════════════
+   탭 전환
+══════════════════════════════ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function toggleSettings(prefix) {
+  document.getElementById(prefix + '-settingsBody').classList.toggle('open');
+  document.getElementById(prefix + '-settingsArrow').classList.toggle('open');
+}
+
+/* ══════════════════════════════
+   공통 유틸
+══════════════════════════════ */
+function fmt(n) { return Number(n).toLocaleString('ko-KR'); }
+function arrowCh(diff) { return diff >= 0 ? '▲' : '▼'; }
+function arrowColor(diff) { return diff >= 0 ? '#E53935' : '#2563EB'; }
+
+function parseNum(s) {
+  return parseFloat((s || '').replace(/%/g,'').replace(/,/g,'').replace(/건/g,'').trim()) || 0;
+}
+
+/* ══════════════════════════════
+   응대율 탭 로직
+══════════════════════════════ */
+function parseAll() {
+  const raw = document.getElementById('pasteArea').value.trim();
+  const msg = document.getElementById('parseMsg');
+  if (!raw) { msg.textContent = '내용을 붙여넣어주세요!'; msg.style.color='#e53935'; return; }
+  const rResult = rParseFromSheet(raw);
+  const iResult = iParseFromSheet(raw);
+  const total = rResult + iResult;
+  msg.textContent = '✅ 응대율 ' + rResult + '개 + 인입률 ' + iResult + '개 완료! Y축 자동 추천 완료';
+  msg.style.color = total > 0 ? '#2e7d32' : '#e53935';
+}
+
+function rParseFromSheet(raw) {
+  if (!raw) return 0;
+  const rows = raw.split('\n').map(r => r.split('\t').map(c => c.trim()));
+  const headerRow = rows[0];
+  const dataRows = {};
+  for (const row of rows.slice(1)) { if (row[0]) dataRows[row[0]] = row; }
+  if (headerRow) {
+    document.getElementById('r-prevLabel').value = headerRow[1] || '';
+    document.getElementById('r-currLabel').value = headerRow[2] || '';
+    document.getElementById('r-lastLabel').value = headerRow[3] || '';
+  }
+  let found = 0;
+  for (const [label, row] of Object.entries(dataRows)) {
+    const vP = parseNum(row[1]), vC = parseNum(row[2]), vL = parseNum(row[3]||'');
+    const l = label.replace(/\s/g,'');
+    const rawLabel = label.replace(/\[.*?\]/g,'').trim(); // [건], [%] 제거한 순수 이름
+
+    // 인입건수 - 노랑 막대 (기사 or 파트너 등 첫 번째 인입)
+    if ((l.includes('인입') && !l.includes('고객') && !l.includes('상담')) && !l.includes('율') && !l.includes('률')) {
+      document.getElementById('r-prevGisaCount').value = vP;
+      document.getElementById('r-currGisaCount').value = vC;
+      document.getElementById('r-lastGisaCount').value = vL;
+      document.getElementById('r-legendGisaCount').value = rawLabel;
+      found++;
+    }
+    // 인입건수 - 회색 막대 (고객 인입)
+    else if (l.includes('고객') && l.includes('인입') && !l.includes('율') && !l.includes('률')) {
+      document.getElementById('r-prevCustomerCount').value = vP;
+      document.getElementById('r-currCustomerCount').value = vC;
+      document.getElementById('r-lastCustomerCount').value = vL;
+      document.getElementById('r-legendCustomerCount').value = rawLabel;
+      found++;
+    }
+    // 응대율 - 주황 선 (기사/파트너 등 첫 번째 응대율)
+    else if (l.includes('응대') && !l.includes('고객')) {
+      document.getElementById('r-prevGisa').value = vP;
+      document.getElementById('r-currGisa').value = vC;
+      document.getElementById('r-lastGisa').value = vL;
+      document.getElementById('r-legendGisaRate').value = rawLabel;
+      found++;
+    }
+    // 응대율 - 회색 선 (고객 응대율)
+    else if (l.includes('고객') && l.includes('응대')) {
+      document.getElementById('r-prevCustomer').value = vP;
+      document.getElementById('r-currCustomer').value = vC;
+      document.getElementById('r-lastCustomer').value = vL;
+      document.getElementById('r-legendCustomerRate').value = rawLabel;
+      found++;
+    }
+  }
+
+  // Y축 자동 추천
+  if (found > 0) {
+    const allRates = [
+      parseFloat(document.getElementById('r-prevGisa').value),
+      parseFloat(document.getElementById('r-currGisa').value),
+      parseFloat(document.getElementById('r-lastGisa').value),
+      parseFloat(document.getElementById('r-prevCustomer').value),
+      parseFloat(document.getElementById('r-currCustomer').value),
+      parseFloat(document.getElementById('r-lastCustomer').value),
+    ].filter(v => !isNaN(v));
+    const allCounts = [
+      parseFloat(document.getElementById('r-prevGisaCount').value),
+      parseFloat(document.getElementById('r-currGisaCount').value),
+      parseFloat(document.getElementById('r-lastGisaCount').value),
+      parseFloat(document.getElementById('r-prevCustomerCount').value),
+      parseFloat(document.getElementById('r-currCustomerCount').value),
+      parseFloat(document.getElementById('r-lastCustomerCount').value),
+    ].filter(v => !isNaN(v));
+
+    if (allRates.length) {
+      const rMin = Math.min(...allRates);
+      const rMax = Math.max(...allRates);
+      document.getElementById('r-yMin').value = Math.max(0, Math.floor(rMin - 2));
+      document.getElementById('r-yMax').value = Math.min(100, Math.ceil(rMax + 2));
+    }
+    if (allCounts.length) {
+      const cMax = Math.max(...allCounts);
+      document.getElementById('r-barYMin').value = 0;
+      document.getElementById('r-barYMax').value = Math.ceil(cMax * 1.3 / 1000) * 1000;
+    }
+  }
+
+  const h = headerRow || [];
+  return found;
+}
+
+function rBuildChart(leftLabel, leftGisa, leftCustomer, leftGisaCount, leftCustomerCount,
+                     rightLabel, rightGisa, rightCustomer, rightGisaCount, rightCustomerCount,
+                     lgc, lcc, lgr, lcr) {
+  const MIN_R = parseFloat(document.getElementById('r-yMin').value);
+  const MAX_R = parseFloat(document.getElementById('r-yMax').value);
+  const TOP = 28, H = 60;
+  const rateY = v => (MAX_R - v) / (MAX_R - MIN_R) * H + TOP;
+  const pCy = rateY(leftCustomer), cCy = rateY(rightCustomer);
+  const pGy = rateY(leftGisa),     cGy = rateY(rightGisa);
+  const midCy = (pCy + cCy) / 2,  midGy = (pGy + cGy) / 2;
+  const barYMin = parseInt(document.getElementById('r-barYMin').value);
+  const barYMax = parseInt(document.getElementById('r-barYMax').value);
+  const scale = 170 / (barYMax - barYMin);
+  const SVG_H = 180;
+  const pGH = Math.round((leftGisaCount  - barYMin) * scale);
+  const pCH = Math.round(leftCustomerCount  * scale);
+  const cGH = Math.round((rightGisaCount - barYMin) * scale);
+  const cCH = Math.round(rightCustomerCount * scale);
+  const pGTop = SVG_H-pGH, pCTop = pGTop-pCH;
+  const cGTop = SVG_H-cGH, cCTop = cGTop-cCH;
+  const trapCustY = ((pCTop+cCTop)/2 + (pGTop+cGTop)/2) / 2;
+  const trapGisaY = ((pGTop+cGTop)/2 + SVG_H) / 2;
+  const diffGisa = rightGisa - leftGisa;
+  const diffCust = rightCustomer - leftCustomer;
+  const diffGisaCount = (rightGisaCount - leftGisaCount) / leftGisaCount * 100;
+  const diffCustCount = (rightCustomerCount - leftCustomerCount) / leftCustomerCount * 100;
+  const custBadgeBg = '#555', gisaBadgeBg = '#E87722';
+  const custCountColor = arrowColor(diffCustCount);
+  const gisaCountColor = arrowColor(diffGisaCount);
+  const ed = (extra='') => `contenteditable="true" spellcheck="false" style="${extra}outline:none;cursor:text;border-bottom:1px dashed transparent;"`;
+  return `
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:18px;font-size:16px;color:#333;">
+    <div style="display:flex;gap:14px;justify-content:center;">
+      <div class="legend-item"><div class="legend-box" style="background:#F5C842;"></div><span ${ed()} spellcheck="false">${lgc}</span></div>
+      <div class="legend-item"><div class="legend-box" style="background:#AAAAAA;"></div><span ${ed()} spellcheck="false">${lcc}</span></div>
+    </div>
+    <div style="display:flex;gap:14px;justify-content:center;">
+      <div class="legend-item"><div class="legend-line-dash" style="border-color:#E87722;"><div style="width:5px;height:5px;border-radius:50%;background:#E87722;position:absolute;"></div></div><span ${ed()} spellcheck="false">${lgr}</span></div>
+      <div class="legend-item"><div class="legend-line-dash" style="border-color:#555;"><div style="width:5px;height:5px;border-radius:50%;background:#555;position:absolute;"></div></div><span ${ed()} spellcheck="false">${lcr}</span></div>
+    </div>
+  </div>
   <div class="rate-section">
     <svg width="320" height="110" viewBox="0 0 320 110">
       <line x1="50" y1="${pCy}" x2="270" y2="${cCy}" stroke="#555" stroke-width="1.5" stroke-dasharray="4,3"/>
@@ -436,24 +544,17 @@ function generateChart() {
       <circle cx="50" cy="${pGy}" r="4" fill="#E87722"/>
       <circle cx="270" cy="${cGy}" r="4" fill="#E87722"/>
     </svg>
-
-    <!-- 고객(회색) 라벨: 점 위 -->
-    <div contenteditable="true" style="position:absolute;left:50px;top:${pCy}px;font-size:16px;font-weight:700;color:#333;transform:translateX(-50%) translateY(calc(-100% - 6px));outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${pC}%</div>
-    <div contenteditable="true" style="position:absolute;left:270px;top:${cCy}px;font-size:16px;font-weight:700;color:#333;transform:translateX(-50%) translateY(calc(-100% - 6px));outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${cC}%</div>
-    <!-- 고객(회색) 태그: 선 위 -->
+    <div ${ed(`position:absolute;left:50px;top:${pCy}px;font-size:16px;font-weight:700;color:#333;transform:translateX(-50%) translateY(calc(-100% - 6px));`)}>${leftCustomer}%</div>
+    <div ${ed(`position:absolute;left:270px;top:${cCy}px;font-size:16px;font-weight:700;color:#333;transform:translateX(-50%) translateY(calc(-100% - 6px));`)}>${rightCustomer}%</div>
     <div style="position:absolute;left:50%;transform:translateX(-50%) translateY(calc(-100% - 4px));top:${midCy}px;">
-      <span contenteditable="true" class="badge gray-badge" style="background:${customerBadgeColor};outline:none;cursor:text;">${arrow(diffCustomer)}${Math.abs(diffCustomer).toFixed(decDiffRateCustomer)}%p</span>
+      <span contenteditable="true" spellcheck="false" class="badge" style="background:${custBadgeBg};outline:none;cursor:text;">${arrowCh(diffCust)}${Math.abs(diffCust).toFixed(1)}%p</span>
     </div>
-
-    <!-- 기사(주황) 라벨: 점 아래 -->
-    <div contenteditable="true" style="position:absolute;left:50px;top:${pGy}px;font-size:16px;font-weight:700;color:#E87722;transform:translateX(-50%) translateY(6px);outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#E87722'" onmouseout="this.style.borderBottomColor='transparent'">${pG}%</div>
-    <div contenteditable="true" style="position:absolute;left:270px;top:${cGy}px;font-size:16px;font-weight:700;color:#E87722;transform:translateX(-50%) translateY(6px);outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#E87722'" onmouseout="this.style.borderBottomColor='transparent'">${cG}%</div>
-    <!-- 기사(주황) 태그: 선 아래 -->
+    <div ${ed(`position:absolute;left:50px;top:${pGy}px;font-size:16px;font-weight:700;color:#E87722;transform:translateX(-50%) translateY(6px);`)}>${leftGisa}%</div>
+    <div ${ed(`position:absolute;left:270px;top:${cGy}px;font-size:16px;font-weight:700;color:#E87722;transform:translateX(-50%) translateY(6px);`)}>${rightGisa}%</div>
     <div style="position:absolute;left:50%;transform:translateX(-50%) translateY(4px);top:${midGy}px;">
-      <span contenteditable="true" class="badge orange-badge" style="background:${gisaBadgeColor};outline:none;cursor:text;">${arrow(diffGisa)}${Math.abs(diffGisa).toFixed(decDiffRateGisa)}%p</span>
+      <span contenteditable="true" spellcheck="false" class="badge" style="background:${gisaBadgeBg};outline:none;cursor:text;">${arrowCh(diffGisa)}${Math.abs(diffGisa).toFixed(1)}%p</span>
     </div>
   </div>
-
   <div style="position:relative;">
     <svg width="320" height="180" viewBox="0 0 320 180">
       <line x1="0" y1="180" x2="320" y2="180" stroke="#333" stroke-width="1.5"/>
@@ -464,140 +565,355 @@ function generateChart() {
       <rect x="230" y="${cGTop}" width="60" height="${cGH}" fill="#F5C842"/>
       <rect x="230" y="${cCTop}" width="60" height="${cCH}" fill="#AAAAAA"/>
     </svg>
-
-    <!-- 막대 숫자: 절대위치 div로 -->
-    <div contenteditable="true" style="position:absolute;left:60px;top:${pCTop + pCH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;outline:none;cursor:text;white-space:nowrap;">${fmt(pCC)}</div>
-    <div contenteditable="true" style="position:absolute;left:60px;top:${pGTop + pGH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;outline:none;cursor:text;white-space:nowrap;">${fmt(pGC)}</div>
-    <div contenteditable="true" style="position:absolute;left:260px;top:${cCTop + cCH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;outline:none;cursor:text;white-space:nowrap;">${fmt(cCC)}</div>
-    <div contenteditable="true" style="position:absolute;left:260px;top:${cGTop + cGH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;outline:none;cursor:text;white-space:nowrap;">${fmt(cGC)}</div>
-
-    <!-- 사다리꼴 변화 % -->
-    <div contenteditable="true" style="position:absolute;left:160px;top:${trapCustY}px;transform:translate(-50%,-50%);font-size:18px;font-weight:700;color:${customerCountColor};outline:none;cursor:text;white-space:nowrap;">${arrow(diffCustomerCount)}${Math.abs(diffCustomerCount).toFixed(decDiffCountCustomer)}%</div>
-    <div contenteditable="true" style="position:absolute;left:160px;top:${trapGisaY}px;transform:translate(-50%,-50%);font-size:18px;font-weight:700;color:${gisaCountColor};outline:none;cursor:text;white-space:nowrap;">${arrow(diffGisaCount)}${Math.abs(diffGisaCount).toFixed(decDiffCountGisa)}%</div>
-
+    <div ${ed(`position:absolute;left:60px;top:${pCTop+pCH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;white-space:nowrap;`)}>${fmt(leftCustomerCount)}</div>
+    <div ${ed(`position:absolute;left:60px;top:${pGTop+pGH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;white-space:nowrap;`)}>${fmt(leftGisaCount)}</div>
+    <div ${ed(`position:absolute;left:260px;top:${cCTop+cCH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;white-space:nowrap;`)}>${fmt(rightCustomerCount)}</div>
+    <div ${ed(`position:absolute;left:260px;top:${cGTop+cGH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;white-space:nowrap;`)}>${fmt(rightGisaCount)}</div>
+    <div ${ed(`position:absolute;left:160px;top:${trapCustY}px;transform:translate(-50%,-50%);font-size:18px;font-weight:700;color:${custCountColor};white-space:nowrap;`)}>${arrowCh(diffCustCount)}${Math.abs(diffCustCount).toFixed(0)}%</div>
+    <div ${ed(`position:absolute;left:160px;top:${trapGisaY}px;transform:translate(-50%,-50%);font-size:18px;font-weight:700;color:${gisaCountColor};white-space:nowrap;`)}>${arrowCh(diffGisaCount)}${Math.abs(diffGisaCount).toFixed(0)}%</div>
     <div style="display:flex;justify-content:space-between;margin-top:6px;">
-      <div contenteditable="true" class="month-label" style="width:120px;outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${prevLabel}</div>
-      <div contenteditable="true" class="month-label" style="width:120px;outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'">${currLabel}</div>
+      <div ${ed(`width:120px;font-size:16px;font-weight:500;color:#333;text-align:center;`)}>${leftLabel}</div>
+      <div ${ed(`width:120px;font-size:16px;font-weight:500;color:#333;text-align:center;`)}>${rightLabel}</div>
     </div>
   </div>`;
-
-  document.getElementById('chartOutput').innerHTML = html;
-  makeDraggable();
 }
 
-function makeDraggable() {
-  const els = document.querySelectorAll('#chartOutput [contenteditable]');
-  els.forEach(el => {
-    let isDragging = false;
-    let startX, startY, origLeft, origTop;
+function rGenerateChart() {
+  const pL = document.getElementById('r-prevLabel').value;
+  const cL = document.getElementById('r-currLabel').value;
+  const lL = document.getElementById('r-lastLabel').value;
+  const pG = parseFloat(document.getElementById('r-prevGisa').value);
+  const pC = parseFloat(document.getElementById('r-prevCustomer').value);
+  const cG = parseFloat(document.getElementById('r-currGisa').value);
+  const cC = parseFloat(document.getElementById('r-currCustomer').value);
+  const lG = parseFloat(document.getElementById('r-lastGisa').value);
+  const lC = parseFloat(document.getElementById('r-lastCustomer').value);
+  const pGC = parseInt(document.getElementById('r-prevGisaCount').value);
+  const pCC = parseInt(document.getElementById('r-prevCustomerCount').value);
+  const cGC = parseInt(document.getElementById('r-currGisaCount').value);
+  const cCC = parseInt(document.getElementById('r-currCustomerCount').value);
+  const lGC = parseInt(document.getElementById('r-lastGisaCount').value);
+  const lCC = parseInt(document.getElementById('r-lastCustomerCount').value);
+  const lgc = document.getElementById('r-legendGisaCount').value;
+  const lcc = document.getElementById('r-legendCustomerCount').value;
+  const lgr = document.getElementById('r-legendGisaRate').value;
+  const lcr = document.getElementById('r-legendCustomerRate').value;
+  document.getElementById('r-chartA').innerHTML = rBuildChart(pL,pG,pC,pGC,pCC, cL,cG,cC,cGC,cCC, lgc,lcc,lgr,lcr);
+  document.getElementById('r-chartB').innerHTML = rBuildChart(lL,lG,lC,lGC,lCC, cL,cG,cC,cGC,cCC, lgc,lcc,lgr,lcr);
+  makeDraggable('r-chartA');
+  makeDraggable('r-chartB');
+}
 
+function rSaveChart(which) {
+  const id = which === 'A' ? 'r-chartA' : 'r-chartB';
+  const el = document.getElementById(id).cloneNode(true);
+  el.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.style.cursor=''; e.style.outline=''; e.style.borderBottom=''; });
+  const pL = document.getElementById('r-prevLabel').value;
+  const cL = document.getElementById('r-currLabel').value;
+  const lL = document.getElementById('r-lastLabel').value;
+  const fn = which==='A' ? `응대율_${pL}_${cL}.html` : `응대율_${lL}_${cL}.html`;
+  saveHTML(el.innerHTML, fn, 'rate');
+}
+
+/* ══════════════════════════════
+   인입률 탭 로직
+══════════════════════════════ */
+function iParseFromSheet(raw) {
+  if (!raw) return 0;
+  const rows = raw.split('\n').map(r => r.split('\t').map(c => c.trim()));
+  const headerRow = rows[0];
+  const dataRows = {};
+  for (const row of rows.slice(1)) { if (row[0]) dataRows[row[0]] = row; }
+  if (headerRow) {
+    document.getElementById('i-prevLabel').value = headerRow[1] || '';
+    document.getElementById('i-currLabel').value = headerRow[2] || '';
+    document.getElementById('i-lastLabel').value = headerRow[3] || '';
+  }
+  let found = 0;
+  for (const [label, row] of Object.entries(dataRows)) {
+    const vP = parseNum(row[1]), vC = parseNum(row[2]), vL = parseNum(row[3]||'');
+    const l = label.replace(/\s/g,'');
+    const rawLabel = label.replace(/\[.*?\]/g,'').trim();
+
+    // 막대: 운행완료, 이용완료 등 건수 항목
+    if (l.includes('완료') && !l.includes('율') && !l.includes('률')) {
+      document.getElementById('i-prevCount').value = vP;
+      document.getElementById('i-currCount').value = vC;
+      document.getElementById('i-lastCount').value = vL;
+      document.getElementById('i-legendBar').value = rawLabel;
+      found++;
+    }
+    // 선: 상담인입률, 상담인입율 등
+    else if (l.includes('상담인입')) {
+      document.getElementById('i-prevRate').value = vP;
+      document.getElementById('i-currRate').value = vC;
+      document.getElementById('i-lastRate').value = vL;
+      document.getElementById('i-legendLine').value = rawLabel;
+      found++;
+    }
+  }
+
+  // Y축 자동 추천
+  if (found > 0) {
+    const allCounts = [
+      parseFloat(document.getElementById('i-prevCount').value),
+      parseFloat(document.getElementById('i-currCount').value),
+      parseFloat(document.getElementById('i-lastCount').value),
+    ].filter(v => !isNaN(v));
+    const allRates = [
+      parseFloat(document.getElementById('i-prevRate').value),
+      parseFloat(document.getElementById('i-currRate').value),
+      parseFloat(document.getElementById('i-lastRate').value),
+    ].filter(v => !isNaN(v));
+
+    if (allCounts.length) {
+      const cMin = Math.min(...allCounts);
+      const cMax = Math.max(...allCounts);
+      const cRange = cMax - cMin;
+      // min을 데이터 최솟값에서 range의 50% 아래로, 100,000 단위 내림
+      const recMin = Math.floor(Math.max(0, cMin - cRange * 0.5) / 100000) * 100000;
+      // max를 데이터 최댓값에서 range의 50% 위로, 100,000 단위 올림
+      const recMax = Math.ceil((cMax + cRange * 0.5) / 100000) * 100000;
+      document.getElementById('i-barYMin').value = recMin;
+      document.getElementById('i-barYMax').value = recMax;
+    }
+    if (allRates.length) {
+      const rMin = Math.min(...allRates);
+      const rMax = Math.max(...allRates);
+      const rRange = rMax - rMin;
+      // 최소 여유: range의 50% 또는 0.05%p 중 큰 값
+      const padding = Math.max(rRange * 0.25, 0.025);
+      const recMin = Math.max(0, Math.floor((rMin - padding) * 100) / 100);
+      const recMax = Math.ceil((rMax + padding) * 100) / 100;
+      document.getElementById('i-rateYMin').value = recMin;
+      document.getElementById('i-rateYMax').value = recMax;
+    }
+  }
+
+  const h = headerRow || [];
+  return found;
+}
+const INIP_H = 180;
+const INIP_SVG_W = 320;
+const INIP_SVG_H = 280; // 막대(180) + 여백 + x라벨
+const INIP_BAR_BOTTOM = 210; // x축 y좌표
+const INIP_L_X = 80;   // 왼쪽 막대 중심
+const INIP_R_X = 240;  // 오른쪽 막대 중심
+const INIP_BAR_W = 60;
+
+function iBuildChart(containerId, leftLabel, leftCount, leftRate, rightLabel, rightCount, rightRate) {
+  const barYMin = parseFloat(document.getElementById('i-barYMin').value) || 0;
+  const barYMax = parseFloat(document.getElementById('i-barYMax').value) || 3500000;
+  const rateYMin = parseFloat(document.getElementById('i-rateYMin').value) || 0.0;
+  const rateYMax = parseFloat(document.getElementById('i-rateYMax').value) || 2.0;
+  const legendBar  = document.getElementById('i-legendBar').value;
+  const legendLine = document.getElementById('i-legendLine').value;
+
+  const rateRange = rateYMax - rateYMin;
+  // 선그래프 Y좌표 (전용 영역 height=60, top=28)
+  const RATE_TOP = 28, RATE_H = 60;
+  const calcDotY = (rate) => {
+    if (rateRange <= 0) return RATE_TOP + RATE_H / 2;
+    const ratio = (rate - rateYMin) / rateRange;
+    return RATE_TOP + RATE_H - Math.max(0, Math.min(1, ratio)) * RATE_H;
+  };
+  const dotLY = calcDotY(leftRate);
+  const dotRY = calcDotY(rightRate);
+  const midX  = (INIP_L_X + INIP_R_X) / 2;
+  const midY  = (dotLY + dotRY) / 2;
+
+  const diffRate = rightRate - leftRate;
+  const badgeText = arrowCh(diffRate) + Math.abs(diffRate).toFixed(2) + '%p';
+
+  // 막대 높이 및 좌표 (SVG height=180, bottom=180)
+  const BAR_SVG_H = 180;
+  const barRange = barYMax - barYMin;
+  const leftH  = barRange > 0 ? Math.round(((leftCount  - barYMin) / barRange) * INIP_H) : 0;
+  const rightH = barRange > 0 ? Math.round(((rightCount - barYMin) / barRange) * INIP_H) : 0;
+  const leftBarTop  = BAR_SVG_H - leftH;
+  const rightBarTop = BAR_SVG_H - rightH;
+
+  // 사다리꼴 중심 Y (막대 사이)
+  const trapMidY = ((leftBarTop + rightBarTop) / 2 + BAR_SVG_H) / 2;
+
+  // 인입률 변화량 (막대 증감)
+  const diffCount = leftCount > 0 ? (rightCount - leftCount) / leftCount * 100 : 0;
+  const trapColor = arrowColor(diffCount);
+
+  const edDiv = (extra) => `contenteditable="true" spellcheck="false" style="position:absolute;${extra}outline:none;cursor:text;border-bottom:1px dashed transparent;" onmouseover="this.style.borderBottomColor='#ccc'" onmouseout="this.style.borderBottomColor='transparent'"`;
+
+  const wrap = document.getElementById(containerId);
+  wrap.innerHTML = `
+    <!-- 범례 -->
+    <div style="display:flex;gap:16px;margin-bottom:18px;font-size:14px;color:#333;align-items:center;justify-content:center;">
+      <div style="display:flex;align-items:center;gap:5px;">
+        <div style="width:18px;height:12px;background:#F5C400;"></div>
+        <span contenteditable="true" spellcheck="false" style="outline:none;cursor:text;">${legendBar}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <div style="width:7px;height:7px;background:#222;border-radius:50%;"></div>
+        <div style="width:14px;height:0;border-top:2px dashed #222;"></div>
+        <div style="width:7px;height:7px;background:#222;border-radius:50%;"></div>
+        <span contenteditable="true" spellcheck="false" style="margin-left:4px;outline:none;cursor:text;">${legendLine}</span>
+      </div>
+    </div>
+
+    <!-- 선그래프 영역 -->
+    <div style="position:relative;width:320px;height:110px;margin-bottom:1px;">
+      <svg width="320" height="110" viewBox="0 0 320 110" style="position:absolute;top:0;left:0;overflow:visible;">
+        <line x1="${INIP_L_X}" y1="${dotLY}" x2="${INIP_R_X}" y2="${dotRY}" stroke="#222" stroke-width="2" stroke-dasharray="5,3"/>
+        <circle cx="${INIP_L_X}" cy="${dotLY}" r="5" fill="#222"/>
+        <circle cx="${INIP_R_X}" cy="${dotRY}" r="5" fill="#222"/>
+      </svg>
+      <div contenteditable="true" spellcheck="false" style="position:absolute;left:${INIP_L_X}px;top:${dotLY - 28}px;transform:translateX(-50%);font-size:16px;font-weight:700;color:#222;white-space:nowrap;outline:none;cursor:text;">${leftRate.toFixed(2)}%</div>
+      <div contenteditable="true" spellcheck="false" style="position:absolute;left:${INIP_R_X}px;top:${dotRY - 28}px;transform:translateX(-50%);font-size:16px;font-weight:700;color:#222;white-space:nowrap;outline:none;cursor:text;">${rightRate.toFixed(2)}%</div>
+      <div contenteditable="true" spellcheck="false" style="position:absolute;left:${midX}px;top:${midY - 16}px;transform:translateX(-50%);background:#222;color:white;font-size:15px;font-weight:700;padding:4px 8px;border-radius:4px;white-space:nowrap;outline:none;cursor:text;">${badgeText}</div>
+    </div>
+
+    <!-- 막대그래프 영역 -->
+    <div style="position:relative;width:320px;height:${BAR_SVG_H}px;">
+      <svg width="320" height="${BAR_SVG_H}" viewBox="0 0 320 ${BAR_SVG_H}" style="position:absolute;top:0;left:0;overflow:visible;">
+        <line x1="0" y1="${BAR_SVG_H}" x2="320" y2="${BAR_SVG_H}" stroke="#333" stroke-width="1.5"/>
+        <polygon points="${INIP_L_X + INIP_BAR_W/2},${leftBarTop} ${INIP_R_X - INIP_BAR_W/2},${rightBarTop} ${INIP_R_X - INIP_BAR_W/2},${BAR_SVG_H} ${INIP_L_X + INIP_BAR_W/2},${BAR_SVG_H}" fill="#F5C400" opacity="0.35"/>
+        <rect x="${INIP_L_X - INIP_BAR_W/2}" y="${leftBarTop}" width="${INIP_BAR_W}" height="${leftH}" fill="#AAAAAA"/>
+        <rect x="${INIP_R_X - INIP_BAR_W/2}" y="${rightBarTop}" width="${INIP_BAR_W}" height="${rightH}" fill="#F5C400"/>
+      </svg>
+      <!-- 막대 중앙 레이블 -->
+      <div contenteditable="true" spellcheck="false" style="position:absolute;left:${INIP_L_X}px;top:${leftBarTop + leftH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;white-space:nowrap;outline:none;cursor:text;">${fmt(leftCount)}</div>
+      <div contenteditable="true" spellcheck="false" style="position:absolute;left:${INIP_R_X}px;top:${rightBarTop + rightH/2}px;transform:translate(-50%,-50%);font-size:16px;font-weight:700;color:#333;white-space:nowrap;outline:none;cursor:text;">${fmt(rightCount)}</div>
+      <!-- 사다리꼴 증감 텍스트 -->
+      <div contenteditable="true" spellcheck="false" style="position:absolute;left:${midX}px;top:${trapMidY}px;transform:translate(-50%,-50%);font-size:18px;font-weight:700;color:${trapColor};white-space:nowrap;outline:none;cursor:text;">${arrowCh(diffCount)}${Math.round(Math.abs(diffCount))}%</div>
+    </div>
+
+    <!-- x 라벨 -->
+    <div style="display:flex;justify-content:space-between;width:320px;margin-top:6px;">
+      <div contenteditable="true" spellcheck="false" style="width:120px;font-size:16px;font-weight:500;color:#333;text-align:center;outline:none;cursor:text;">${leftLabel}</div>
+      <div contenteditable="true" spellcheck="false" style="width:120px;font-size:16px;font-weight:500;color:#333;text-align:center;outline:none;cursor:text;">${rightLabel}</div>
+    </div>`;
+}
+
+function iGenerateChart() {
+  const pL = document.getElementById('i-prevLabel').value;
+  const cL = document.getElementById('i-currLabel').value;
+  const lL = document.getElementById('i-lastLabel').value;
+  const pC = parseFloat(document.getElementById('i-prevCount').value);
+  const cC = parseFloat(document.getElementById('i-currCount').value);
+  const lC = parseFloat(document.getElementById('i-lastCount').value);
+  const pR = parseFloat(document.getElementById('i-prevRate').value);
+  const cR = parseFloat(document.getElementById('i-currRate').value);
+  const lR = parseFloat(document.getElementById('i-lastRate').value);
+  iBuildChart('i-chartA', pL, pC, pR, cL, cC, cR);
+  iBuildChart('i-chartB', lL, lC, lR, cL, cC, cR);
+  makeDraggable('i-chartA');
+  makeDraggable('i-chartB');
+}
+
+function iSaveChart(which) {
+  const id = which === 'A' ? 'i-chartA' : 'i-chartB';
+  const el = document.getElementById(id).cloneNode(true);
+  el.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.style.cursor=''; e.style.outline=''; e.style.borderBottom=''; });
+  const pL = document.getElementById('i-prevLabel').value;
+  const cL = document.getElementById('i-currLabel').value;
+  const lL = document.getElementById('i-lastLabel').value;
+  const fn = which==='A' ? `인입률_${pL}_${cL}.html` : `인입률_${lL}_${cL}.html`;
+  saveHTML(el.innerHTML, fn, 'inip');
+}
+
+/* ══════════════════════════════
+   드래그 공통
+══════════════════════════════ */
+function makeDraggable(id) {
+  document.querySelectorAll('#' + id + ' [contenteditable]').forEach(el => {
+    let dragging=false, sx, sy, ox, oy;
+    el.style.cursor = 'grab';
     el.addEventListener('mousedown', e => {
-      if (e.detail === 2) return;
-      isDragging = false;
-      startX = e.clientX;
-      startY = e.clientY;
-
+      if (e.detail===2) return;
+      dragging=false; sx=e.clientX; sy=e.clientY;
       const onMove = e => {
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-
-        if (!isDragging && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
-          isDragging = true;
-          el.blur();
-
-          // 드래그 시작 시점에 현재 화면 위치 기준으로 absolute 전환
-          const rect = el.getBoundingClientRect();
-          const parentRect = el.offsetParent.getBoundingClientRect();
-          const left = rect.left - parentRect.left;
-          const top  = rect.top  - parentRect.top;
-
+        const dx=e.clientX-sx, dy=e.clientY-sy;
+        if (!dragging && (Math.abs(dx)>3||Math.abs(dy)>3)) {
+          dragging=true; el.blur();
+          const r = el.getBoundingClientRect();
+          // 가장 가까운 positioned 부모 찾기
+          let parent = el.parentElement;
+          while (parent && getComputedStyle(parent).position === 'static') {
+            parent = parent.parentElement;
+          }
+          const pr = parent ? parent.getBoundingClientRect() : {left:0, top:0};
+          ox = r.left - pr.left;
+          oy = r.top  - pr.top;
           el.style.position  = 'absolute';
           el.style.transform = 'none';
-          el.style.left      = left + 'px';
-          el.style.top       = top  + 'px';
+          el.style.left      = ox + 'px';
+          el.style.top       = oy + 'px';
           el.style.margin    = '0';
-
-          origLeft = left;
-          origTop  = top;
-          el.style.cursor = 'grabbing';
+          el.style.width     = 'auto';
+          el.style.cursor    = 'grabbing';
         }
-
-        if (isDragging) {
-          el.style.left = (origLeft + dx) + 'px';
-          el.style.top  = (origTop  + dy) + 'px';
-        }
+        if (dragging) { el.style.left=(ox+dx)+'px'; el.style.top=(oy+dy)+'px'; }
       };
-
       const onUp = () => {
-        if (!isDragging) {
+        if (!dragging) {
           el.focus();
-          const range = document.createRange();
-          range.selectNodeContents(el);
-          range.collapse(false);
-          const sel = window.getSelection();
+          const rng=document.createRange();
+          rng.selectNodeContents(el);
+          rng.collapse(false);
+          const sel=window.getSelection();
           sel.removeAllRanges();
-          sel.addRange(range);
+          sel.addRange(rng);
         }
-        el.style.cursor = 'grab';
-        isDragging = false;
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
+        el.style.cursor='grab'; dragging=false;
+        document.removeEventListener('mousemove',onMove);
+        document.removeEventListener('mouseup',onUp);
       };
-
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
+      document.addEventListener('mousemove',onMove);
+      document.addEventListener('mouseup',onUp);
       e.preventDefault();
     });
-
-    el.style.cursor = 'grab';
   });
 }
 
-function saveChart() {
-  const chartEl = document.getElementById('chartOutput').cloneNode(true);
-  chartEl.querySelectorAll('[contenteditable]').forEach(el => {
-    el.removeAttribute('contenteditable');
-    el.style.cursor = '';
-    el.style.outline = '';
-    el.onmouseover = null;
-    el.onmouseout = null;
-    el.style.borderBottom = '';
-    el.style.userSelect = '';
-  });
-  const chart = chartEl.innerHTML;
-  const prevLabel = document.getElementById('prevLabel').value;
-  const currLabel = document.getElementById('currLabel').value;
+/* ══════════════════════════════
+   HTML 저장 공통
+══════════════════════════════ */
+function saveHTML(chartInner, filename, type) {
+  const rateCSS = `
+    .chart-wrap-rate{width:320px;background:white;position:relative;}
+    .legend-item{display:flex;align-items:center;gap:5px;}
+    .legend-box{width:18px;height:10px;border-radius:2px;}
+    .legend-line-dash{width:18px;height:0;border-top:2px dashed;position:relative;display:flex;align-items:center;justify-content:center;}
+    .badge{display:inline-flex;align-items:center;gap:3px;font-size:18px;font-weight:700;padding:3px 8px;border-radius:3px;color:white;white-space:nowrap;}
+    .rate-section{position:relative;height:110px;margin-bottom:10px;}
+    .month-label{font-size:16px;color:#333;font-weight:500;text-align:center;}`;
+  const inipCSS = `
+    .inip-wrap{width:360px;background:white;position:relative;}
+    .inip-legend{display:flex;gap:16px;margin-bottom:60px;font-size:14px;color:#333;align-items:center;justify-content:center;}
+    .inip-legend-bar{width:18px;height:12px;background:#F5C400;}
+    .inip-legend-dot{width:7px;height:7px;background:#222;border-radius:50%;}
+    .inip-legend-dash{width:14px;height:2px;border-top:2px dashed #222;}
+    .inip-bars-area{display:flex;align-items:flex-end;justify-content:center;gap:120px;height:180px;position:relative;z-index:1;flex:1;}
+    .inip-bar-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:180px;position:relative;}
+    .inip-bar-left{width:60px;background:#AAAAAA;position:relative;}
+    .inip-bar-right{width:60px;background:#F5C400;position:relative;}
+    .inip-dot{width:9px;height:9px;background:#222;border-radius:50%;position:absolute;left:50%;transform:translateX(-50%);}
+    .inip-dot-label{position:absolute;font-size:16px;font-weight:700;color:#222;white-space:nowrap;transform:translateX(-50%);z-index:10;}
+    .inip-badge{position:absolute;color:#fff;font-size:16px;font-weight:700;padding:4px 8px;white-space:nowrap;border-radius:4px;z-index:10;}
+    .inip-x-label{font-size:15px;color:#333;text-align:center;position:absolute;white-space:nowrap;transform:translateX(-50%);}
+    .inip-connector{position:absolute;top:0;left:0;pointer-events:none;z-index:10;}`;
 
-  const fullHTML = `<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: white; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; display: flex; justify-content: center; align-items: center; padding: 30px; }
-  .chart-wrap { width: 320px; background: white; }
-  .legend-item { display: flex; align-items: center; gap: 5px; }
-  .legend-box { width: 18px; height: 10px; border-radius: 2px; }
-  .legend-line { width: 18px; height: 0; border-top: 2px dashed; position: relative; display: flex; align-items: center; justify-content: center; }
-  .badge { display: inline-flex; align-items: center; gap: 3px; font-size: 18px; font-weight: 700; padding: 3px 8px; border-radius: 3px; color: white; white-space: nowrap; }
-  .rate-section { position: relative; height: 110px; margin-bottom: 10px; }
-  .month-label { font-size: 16px; color: #333; font-weight: 500; text-align: center; }
-</style>
-</head>
-<body>
-<div class="chart-wrap">${chart}</div>
-</body>
-</html>`;
+  const fullHTML = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<style>*{margin:0;padding:0;box-sizing:border-box;}body{background:white;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;display:flex;justify-content:center;padding:30px;}
+${type==='rate' ? rateCSS : inipCSS}
+</style></head><body><div>${chartInner}</div></body></html>`;
 
-  const blob = new Blob([fullHTML], { type: 'text/html' });
+  const blob = new Blob([fullHTML], {type:'text/html'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `report_${prevLabel}_${currLabel}.html`;
+  a.download = filename;
   a.click();
 }
 
-// 초기 그래프 자동 생성
-window.onload = generateChart;
+window.onload = () => { rGenerateChart(); iGenerateChart(); };
 </script>
 </body>
 </html>
